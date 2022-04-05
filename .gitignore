@@ -1,0 +1,8 @@
+*.swp
+.DS_Store
+config.json
+alma-rcr.csv
+data/
+resultats*
+tags
+.ctags
