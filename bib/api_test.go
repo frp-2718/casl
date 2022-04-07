@@ -1,6 +1,7 @@
 package bib
 
 import (
+	"casl/marc"
 	"testing"
 )
 
@@ -263,9 +264,53 @@ func TestFilter(t *testing.T) {
 
 	fetcher := mockHttpFetch{}
 	for i, test := range tests {
-		got := Filter(test.input, &fetcher)
+		got := Filter(test.input, []string{}, &fetcher)
 		if !equalCRecords(got, test.want) {
 			t.Errorf("[%d] Filter with %v returned %v : want %v", i, test.input, got, test.want)
+		}
+	}
+}
+
+func TestExtractRCR(t *testing.T) {
+	var tests = []struct {
+		input string
+		want  string
+	}{
+		{"123456789:000111222", "123456789"},
+		{"a:", "a"},
+		{"", ""},
+		{"rcr", "rcr"},
+	}
+
+	for _, test := range tests {
+		if got := extractRCR(test.input); got != test.want {
+			t.Errorf("%s returned %s but want %s", test.input, got, test.want)
+		}
+	}
+}
+
+func TestAddSublocation(t *testing.T) {
+	r1, _ := marc.NewRecord(marcOK1)
+	r2, _ := marc.NewRecord(marcOK2)
+	r3, _ := marc.NewRecord(marcOK3)
+	c1 := CRecord{RCR: "rcr-ok", SUDOCSublocation: ""}
+	c2 := CRecord{RCR: "rcr-ok", SUDOCSublocation: ""}
+	c3 := CRecord{RCR: "rcr-ok", SUDOCSublocation: ""}
+
+	var tests = []struct {
+		input1 *CRecord
+		input2 *marc.Record
+		want   string
+	}{
+		{&c1, r1, ""},
+		{&c2, r2, "sublocation"},
+		{&c3, r3, "sublocation1,sublocation2"},
+	}
+
+	for _, test := range tests {
+		addSublocation(test.input1, test.input2)
+		if test.input1.SUDOCSublocation != test.want {
+			t.Errorf("got %q want %q", test.input1.SUDOCSublocation, test.want)
 		}
 	}
 }

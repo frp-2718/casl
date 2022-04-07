@@ -21,11 +21,12 @@ type almaLocation struct {
 
 // CRecord is the fusion of a SUDOC record and an Alma record.
 type CRecord struct {
-	PPN          string
-	AlmaLibrary  string
-	SUDOCLibrary string
-	ILN          string
-	RCR          string
-	InAlma       bool
-	InSUDOC      bool
+	PPN              string
+	AlmaLibrary      string
+	SUDOCLibrary     string
+	SUDOCSublocation string
+	ILN              string
+	RCR              string
+	InAlma           bool
+	InSUDOC          bool
 }

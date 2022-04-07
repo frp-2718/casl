@@ -98,7 +98,7 @@ func ComparePPN(records []BibRecord, ignoredCollections []string) []CRecord {
 
 // Filter builds a list of CRecord by filtering the given list according to
 // some very specific criterions.
-func Filter(records []CRecord, client requests.Fetcher) []CRecord {
+func Filter(records []CRecord, monoRCRs []string, client requests.Fetcher) []CRecord {
 	var res []CRecord
 	for _, record := range records {
 		marcxml := client.FetchMarc(record.PPN)
@@ -113,8 +113,36 @@ func Filter(records []CRecord, client requests.Fetcher) []CRecord {
 		if !strings.HasPrefix(class, "O") {
 			res = append(res, record)
 		}
+		// Add sublocations for some monolithic RCRs
+		if in(record.RCR, monoRCRs) {
+			// TODO: DRY
+			marcxml = client.FetchMarc(record.PPN)
+			marcrecord, err = marc.NewRecord(marcxml)
+			if err != nil {
+				log.Printf("bib.Filter: unable to create MARC record from PPN %s", record.PPN)
+				continue
+			}
+			addSublocation(&record, marcrecord)
+		}
 	}
 	return res
+}
+
+func addSublocation(r *CRecord, m *marc.Record) {
+	fields := m.GetField("930")
+	sep := ""
+	for _, f := range fields {
+		if extractRCR(f.GetValue("5")[0]) == r.RCR {
+			if r.SUDOCSublocation != "" {
+				sep = ","
+			}
+			r.SUDOCSublocation = r.SUDOCSublocation + sep + f.GetValue("c")[0]
+		}
+	}
+}
+
+func extractRCR(from string) string {
+	return strings.Split(from, ":")[0]
 }
 
 func convertLocations(s1 []alma.Holding) []almaLocation {

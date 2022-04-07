@@ -12,6 +12,7 @@ type config struct {
 	ILNs            []string `json:"iln_to_track"`
 	IgnoredAlmaColl []string `json:"ignored_alma_collections"`
 	IgnoredSudocRCR []string `json:"ignored_sudoc_rcr"`
+	MonolithicRCR   []string `json:"monolithic_rcr"`
 }
 
 func loadConfig() *config {

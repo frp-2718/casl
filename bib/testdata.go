@@ -339,3 +339,128 @@ var marcError = []byte(`<?xml version="1.0" encoding="UTF-8"?>
 <error>Les données bibliographiques sont indéfinies
   <ppn>155075380</ppn>
 </error>`)
+
+var marcOK1 = []byte(`<?xml version="1.0" encoding="UTF-8"?>
+<record>
+  <leader>     cam0 22        450 </leader>
+  <controlfield tag="003">http://www.sudoc.fr/155075381</controlfield>
+  <controlfield tag="008">Aax3</controlfield>
+  <datafield tag="200" ind1="1" ind2=" ">
+    <subfield code="a">Orlando</subfield>
+  </datafield>
+  <datafield tag="410" ind1=" " ind2="|">
+    <subfield code="0">00102714X</subfield>
+  </datafield>
+  <datafield tag="702" ind1=" " ind2="1">
+    <subfield code="3">028265866</subfield>
+    <subfield code="a">Nordon</subfield>
+    <subfield code="b">Pierre</subfield>
+  </datafield>
+  <datafield tag="830" ind1=" " ind2=" ">
+    <subfield code="a">pas un doublon</subfield>
+  </datafield>
+  <datafield tag="930" ind1="2" ind2=" ">
+	<subfield code="5">rcr1:epnepnepn</subfield>
+    <subfield code="c">Libre-accès</subfield>
+    <subfield code="a">8 WOO</subfield>
+  </datafield>
+  <datafield tag="940" ind1=" " ind2=" ">
+    <subfield code="5">ETAB2</subfield>
+    <subfield code="a">20130626</subfield>
+  </datafield>
+  <datafield tag="930" ind1=" " ind2=" ">
+	<subfield code="5">rcr2:epnepnepn</subfield>
+    <subfield code="j">g</subfield>
+  </datafield>
+  <datafield tag="940" ind1=" " ind2=" ">
+    <subfield code="5">ETAB4</subfield>
+    <subfield code="a">20110923</subfield>
+  </datafield>
+</record>`)
+
+var marcOK2 = []byte(`<?xml version="1.0" encoding="UTF-8"?>
+<record>
+  <leader>     cam0 22        450 </leader>
+  <controlfield tag="003">http://www.sudoc.fr/155075381</controlfield>
+  <controlfield tag="008">Aax3</controlfield>
+  <datafield tag="200" ind1="1" ind2=" ">
+    <subfield code="a">Orlando</subfield>
+  </datafield>
+  <datafield tag="410" ind1=" " ind2="|">
+    <subfield code="0">00102714X</subfield>
+  </datafield>
+  <datafield tag="702" ind1=" " ind2="1">
+    <subfield code="3">028265866</subfield>
+    <subfield code="a">Nordon</subfield>
+    <subfield code="b">Pierre</subfield>
+  </datafield>
+  <datafield tag="830" ind1=" " ind2=" ">
+    <subfield code="a">pas un doublon</subfield>
+  </datafield>
+  <datafield tag="930" ind1="2" ind2=" ">
+	<subfield code="5">rcr1:epnepnepn</subfield>
+    <subfield code="c">Libre-accès</subfield>
+    <subfield code="a">8 WOO</subfield>
+  </datafield>
+  <datafield tag="940" ind1=" " ind2=" ">
+    <subfield code="5">ETAB2</subfield>
+    <subfield code="a">20130626</subfield>
+  </datafield>
+  <datafield tag="930" ind1=" " ind2=" ">
+	<subfield code="5">rcr-ok:epnepnepn</subfield>
+    <subfield code="j">g</subfield>
+	<subfield code="c">sublocation</subfield>
+  </datafield>
+  <datafield tag="940" ind1=" " ind2=" ">
+    <subfield code="5">ETAB4</subfield>
+    <subfield code="a">20110923</subfield>
+  </datafield>
+</record>`)
+
+var marcOK3 = []byte(`<?xml version="1.0" encoding="UTF-8"?>
+<record>
+  <leader>     cam0 22        450 </leader>
+  <controlfield tag="003">http://www.sudoc.fr/155075381</controlfield>
+  <controlfield tag="008">Aax3</controlfield>
+  <datafield tag="200" ind1="1" ind2=" ">
+    <subfield code="a">Orlando</subfield>
+  </datafield>
+  <datafield tag="410" ind1=" " ind2="|">
+    <subfield code="0">00102714X</subfield>
+  </datafield>
+  <datafield tag="702" ind1=" " ind2="1">
+    <subfield code="3">028265866</subfield>
+    <subfield code="a">Nordon</subfield>
+    <subfield code="b">Pierre</subfield>
+  </datafield>
+  <datafield tag="830" ind1=" " ind2=" ">
+    <subfield code="a">pas un doublon</subfield>
+  </datafield>
+  <datafield tag="930" ind1=" " ind2=" ">
+	<subfield code="5">rcr-ok:epnepnepn</subfield>
+    <subfield code="j">g</subfield>
+	<subfield code="c">sublocation1</subfield>
+  </datafield>
+  <datafield tag="940" ind1=" " ind2=" ">
+    <subfield code="5">ETAB4</subfield>
+    <subfield code="a">20110923</subfield>
+  </datafield>
+  <datafield tag="930" ind1="2" ind2=" ">
+	<subfield code="5">rcr1:epnepnepn</subfield>
+    <subfield code="c">Libre-accès</subfield>
+    <subfield code="a">8 WOO</subfield>
+  </datafield>
+  <datafield tag="940" ind1=" " ind2=" ">
+    <subfield code="5">ETAB2</subfield>
+    <subfield code="a">20130626</subfield>
+  </datafield>
+  <datafield tag="930" ind1=" " ind2=" ">
+	<subfield code="5">rcr-ok:epnepnepn</subfield>
+    <subfield code="j">g</subfield>
+	<subfield code="c">sublocation2</subfield>
+  </datafield>
+  <datafield tag="940" ind1=" " ind2=" ">
+    <subfield code="5">ETAB4</subfield>
+    <subfield code="a">20110923</subfield>
+  </datafield>
+</record>`)

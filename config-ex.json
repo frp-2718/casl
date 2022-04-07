@@ -3,5 +3,6 @@
     "alma_api_key": "secret-key",
     "iln_to_track": ["AA","BB","CC"],
     "ignored_alma_collections": ["COLL1","COLL2"],
-    "ignored_sudoc_rcr": ["rcr1","rcr2","rcr3","rcr4","rcr5"]
+    "ignored_sudoc_rcr": ["rcr1","rcr2","rcr3","rcr4","rcr5"],
+    "monolithic_rcr" : ["rcr6", "rcr7"]
 }

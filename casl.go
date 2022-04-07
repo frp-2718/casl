@@ -26,6 +26,7 @@ var alma2string map[string]string
 
 // Filters.
 var followedRCR []string
+var monolithicRCR []string
 
 var httpFetcher requests.HttpFetch
 
@@ -38,6 +39,7 @@ func init() {
 		log.Fatalf("casl: unable to fetch RCRs: %s", err)
 	}
 	followedRCR = filter(followed, conf.IgnoredSudocRCR)
+	monolithicRCR = conf.MonolithicRCR
 }
 
 func main() {
@@ -77,7 +79,7 @@ func main() {
 	resultats := bib.GetAlmaLocations(records, conf.AlmaAPIKey, alma2rcr)
 
 	// End results comparison
-	anomalies := bib.Filter(bib.ComparePPN(resultats, conf.IgnoredAlmaColl), &httpFetcher)
+	anomalies := bib.Filter(bib.ComparePPN(resultats, conf.IgnoredAlmaColl), monolithicRCR, &httpFetcher)
 
 	writeCSV(anomalies)
 
@@ -93,7 +95,7 @@ func writeCSV(results []bib.CRecord) {
 	// TODO: remove boolean columns
 	for _, res := range results {
 		record := []string{res.PPN, rcr2iln[res.RCR], alma2string[res.AlmaLibrary],
-			res.SUDOCLibrary, res.RCR, strconv.FormatBool(res.InAlma),
+			res.SUDOCLibrary + "/" + res.SUDOCSublocation, res.RCR, strconv.FormatBool(res.InAlma),
 			strconv.FormatBool(res.InSUDOC)}
 		records = append(records, record)
 	}
