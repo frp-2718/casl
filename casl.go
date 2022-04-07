@@ -94,8 +94,12 @@ func writeCSV(results []bib.CRecord) {
 		"Bibliothèque SUDOC", "RCR", "Dans Alma ?", "Dans le SUDOC ?"})
 	// TODO: remove boolean columns
 	for _, res := range results {
+		var suffix string
+		if res.SUDOCSublocation != "" {
+			suffix = " - " + res.SUDOCSublocation
+		}
 		record := []string{res.PPN, rcr2iln[res.RCR], alma2string[res.AlmaLibrary],
-			res.SUDOCLibrary + "/" + res.SUDOCSublocation, res.RCR, strconv.FormatBool(res.InAlma),
+			res.SUDOCLibrary + suffix, res.RCR, strconv.FormatBool(res.InAlma),
 			strconv.FormatBool(res.InSUDOC)}
 		records = append(records, record)
 	}

@@ -114,7 +114,7 @@ func Filter(records []CRecord, monoRCRs []string, client requests.Fetcher) []CRe
 			res = append(res, record)
 		}
 		// Add sublocations for some monolithic RCRs
-		if in(record.RCR, monoRCRs) {
+		if record.SUDOCLibrary != "" && in(record.RCR, monoRCRs) {
 			// TODO: DRY
 			marcxml = client.FetchMarc(record.PPN)
 			marcrecord, err = marc.NewRecord(marcxml)
@@ -136,7 +136,9 @@ func addSublocation(r *CRecord, m *marc.Record) {
 			if r.SUDOCSublocation != "" {
 				sep = ","
 			}
-			r.SUDOCSublocation = r.SUDOCSublocation + sep + f.GetValue("c")[0]
+			if sublocation := f.GetValue("c"); sublocation != nil {
+				r.SUDOCSublocation = r.SUDOCSublocation + sep + sublocation[0]
+			}
 		}
 	}
 }
