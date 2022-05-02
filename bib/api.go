@@ -105,24 +105,24 @@ func Filter(records []CRecord, monoRCRs []string, client requests.Fetcher) []CRe
 		marcrecord, err := marc.NewRecord(marcxml)
 		if err != nil {
 			// ignore error for now
-			res = append(res, record)
-			continue
+			//res = append(res, record)
+			//continue
 		}
 		class := marcrecord.GetField("008")[0].GetValue("")[0]
 		// Exclusion of electronic resources
 		if !strings.HasPrefix(class, "O") {
-			res = append(res, record)
-		}
-		// Add sublocations for some monolithic RCRs
-		if record.SUDOCLibrary != "" && in(record.RCR, monoRCRs) {
-			// TODO: DRY
-			marcxml = client.FetchMarc(record.PPN)
-			marcrecord, err = marc.NewRecord(marcxml)
-			if err != nil {
-				log.Printf("bib.Filter: unable to create MARC record from PPN %s", record.PPN)
-				continue
+			// Add sublocations for some monolithic RCRs
+			if record.SUDOCLibrary != "" && in(record.RCR, monoRCRs) {
+				// TODO: DRY
+				marcxml = client.FetchMarc(record.PPN)
+				marcrecord, err = marc.NewRecord(marcxml)
+				if err != nil {
+					log.Printf("bib.Filter: unable to create MARC record from PPN %s", record.PPN)
+					continue
+				}
+				addSublocation(&record, marcrecord)
 			}
-			addSublocation(&record, marcrecord)
+			res = append(res, record)
 		}
 	}
 	return res
@@ -131,13 +131,17 @@ func Filter(records []CRecord, monoRCRs []string, client requests.Fetcher) []CRe
 func addSublocation(r *CRecord, m *marc.Record) {
 	fields := m.GetField("930")
 	sep := ""
+	var sublocations []string
 	for _, f := range fields {
 		if extractRCR(f.GetValue("5")[0]) == r.RCR {
 			if r.SUDOCSublocation != "" {
-				sep = ","
+				sep = ", "
 			}
 			if sublocation := f.GetValue("c"); sublocation != nil {
-				r.SUDOCSublocation = r.SUDOCSublocation + sep + sublocation[0]
+				if !in(sublocation[0], sublocations) {
+					sublocations = append(sublocations, sublocation[0])
+					r.SUDOCSublocation = r.SUDOCSublocation + sep + sublocation[0]
+				}
 			}
 		}
 	}
