@@ -105,8 +105,8 @@ func Filter(records []CRecord, monoRCRs []string, client requests.Fetcher) []CRe
 		marcrecord, err := marc.NewRecord(marcxml)
 		if err != nil {
 			// ignore error for now
-			//res = append(res, record)
-			//continue
+			res = append(res, record)
+			continue
 		}
 		class := marcrecord.GetField("008")[0].GetValue("")[0]
 		// Exclusion of electronic resources

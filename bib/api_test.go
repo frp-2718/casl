@@ -304,7 +304,7 @@ func TestAddSublocation(t *testing.T) {
 	}{
 		{&c1, r1, ""},
 		{&c2, r2, "sublocation"},
-		{&c3, r3, "sublocation1,sublocation2"},
+		{&c3, r3, "sublocation1, sublocation2"},
 	}
 
 	for _, test := range tests {
