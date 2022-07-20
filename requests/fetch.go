@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"sync"
 )
 
 const (
@@ -23,17 +24,14 @@ type Fetcher interface {
 }
 
 type HttpFetch struct{}
+type HttpRequester func(string) []byte
 
 // FetchAll returns all xml data corresponding to each ppn in a map, or
 // nil if unsuccessful.
 // Note that the SUDOC API ignores unknown PPNs when requested with a
 // muli-request.
 func (f *HttpFetch) FetchAll(ppns []string) [][]byte {
-	var xmlBatch [][]byte
-	for _, url := range buildURLs(ppns) {
-		xmlBatch = append(xmlBatch, fetch(url))
-	}
-	return xmlBatch
+	return fetchBatch(ppns, fetch)
 }
 
 // FetchRCR returns a XML iln2rcr response from a list of ILNs.
@@ -67,6 +65,32 @@ func fetch(url string) []byte {
 		return []byte{}
 	}
 	return data
+}
+
+func fetchBatch(ppns []string, request HttpRequester) [][]byte {
+	urls := buildURLs(ppns)
+	xmlBatch := make([][]byte, 0, len(urls))
+
+	for _, url := range urls {
+		xmlBatch = append(xmlBatch, request(url))
+	}
+	return xmlBatch
+}
+
+func fetchBatchConcurrent(ppns []string, request HttpRequester) [][]byte {
+	urls := buildURLs(ppns)
+	xmlBatch := make([][]byte, len(urls))
+	wg := sync.WaitGroup{}
+
+	for index, url := range urls {
+		wg.Add(1)
+		go func(i int, u string) {
+			defer wg.Done()
+			xmlBatch[i] = request(u)
+		}(index, url)
+	}
+	wg.Wait()
+	return xmlBatch
 }
 
 func buildURLs(params []string) []string {

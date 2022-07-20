@@ -15,6 +15,7 @@ import (
 func GetSudocLocations(ppns map[string]bool, rcrs []string, client requests.Fetcher) []BibRecord {
 	var records []BibRecord
 
+	// TODO: improve that and make a function
 	// We need a slice from the set of ppns.
 	ppnsList := make([]string, 0, len(ppns))
 
