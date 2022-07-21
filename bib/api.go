@@ -8,7 +8,10 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"sync"
 )
+
+const MAX_CONCURRENT_REQUESTS = 50
 
 // GetSudocLocations fetches locations and returns populated BibRecords
 // corresponding to the given ppns.
@@ -105,7 +108,9 @@ func Filter(records []CRecord, monoRCRs []string, client requests.Fetcher) []CRe
 		marcxml := client.FetchMarc(record.PPN)
 		marcrecord, err := marc.NewRecord(marcxml)
 		if err != nil {
-			// ignore error for now
+			//log.Printf("bib.Filter: unable to create MARC record from PPN %s", record.PPN)
+			// this is always safe to ignore errors and pretend that the record
+			// should not be filtered
 			res = append(res, record)
 			continue
 		}
@@ -114,18 +119,52 @@ func Filter(records []CRecord, monoRCRs []string, client requests.Fetcher) []CRe
 		if !strings.HasPrefix(class, "O") {
 			// Add sublocations for some monolithic RCRs
 			if record.SUDOCLibrary != "" && in(record.RCR, monoRCRs) {
-				// TODO: DRY
-				marcxml = client.FetchMarc(record.PPN)
-				marcrecord, err = marc.NewRecord(marcxml)
-				if err != nil {
-					log.Printf("bib.Filter: unable to create MARC record from PPN %s", record.PPN)
-					continue
-				}
 				addSublocation(&record, marcrecord)
 			}
 			res = append(res, record)
 		}
 	}
+	return res
+}
+
+func FilterConcurrent(records []CRecord, monoRCRs []string, client requests.Fetcher) []CRecord {
+	var tokens = make(chan struct{}, MAX_CONCURRENT_REQUESTS)
+	var res []CRecord
+	wg := sync.WaitGroup{}
+	var mu = &sync.Mutex{}
+
+	for _, record := range records {
+		wg.Add(1)
+		go func(r CRecord) {
+			tokens <- struct{}{}
+			defer wg.Done()
+			marcxml := client.FetchMarc(r.PPN)
+			marcrecord, err := marc.NewRecord(marcxml)
+			if err != nil {
+				//log.Printf("bib.Filter: unable to create MARC record from PPN %s", r.PPN)
+				// this is always safe to ignore errors and pretend that the record
+				// should not be filtered
+				mu.Lock()
+				res = append(res, r)
+				mu.Unlock()
+				<-tokens
+				return
+			}
+			class := marcrecord.GetField("008")[0].GetValue("")[0]
+			// Exclusion of electronic resources
+			if !strings.HasPrefix(class, "O") {
+				// Add sublocations for some monolithic RCRs
+				if r.SUDOCLibrary != "" && in(r.RCR, monoRCRs) {
+					addSublocation(&r, marcrecord)
+				}
+				mu.Lock()
+				res = append(res, r)
+				mu.Unlock()
+			}
+			<-tokens
+		}(record)
+	}
+	wg.Wait()
 	return res
 }
 

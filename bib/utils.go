@@ -75,8 +75,13 @@ func equalCRecords(c1, c2 []CRecord) bool {
 	if len(c1) != len(c2) {
 		return false
 	}
-	for i, record := range c1 {
-		if !equalCRecord(record, c2[i]) {
+	for _, record1 := range c1 {
+		for _, record2 := range c2 {
+			if equalCRecord(record1, record2) {
+				break
+			} else {
+				continue
+			}
 			return false
 		}
 	}

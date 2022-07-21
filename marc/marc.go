@@ -5,7 +5,6 @@ package marc
 import (
 	"encoding/xml"
 	"errors"
-	"log"
 )
 
 type Record struct {
@@ -49,7 +48,7 @@ func NewRecord(xmlData []byte) (*Record, error) {
 	var r Record
 	err := xml.Unmarshal(xmlData, &r)
 	if err != nil {
-		log.Printf("NewRecord: %s", err)
+		//log.Printf("NewRecord: %s", err)
 		return nil, err
 	}
 	return &r, nil

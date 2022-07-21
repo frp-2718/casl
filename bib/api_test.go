@@ -2,7 +2,9 @@ package bib
 
 import (
 	"casl/marc"
+	"strconv"
 	"testing"
+	"time"
 )
 
 // Mocking the HttpFetcher
@@ -271,6 +273,34 @@ func TestFilter(t *testing.T) {
 	}
 }
 
+func TestFilterConcurrent(t *testing.T) {
+	var crecords []CRecord
+	crecords = append(crecords, CRecord{PPN: "ppn_ok1"})
+	crecords = append(crecords, CRecord{PPN: "ppn_ok2"})
+	crecords = append(crecords, CRecord{PPN: "ppn_err"})
+	crecords = append(crecords, CRecord{PPN: "ppn_elec"})
+
+	var tests = []struct {
+		input []CRecord
+		want  []CRecord
+	}{
+		{[]CRecord{crecords[0], crecords[1]}, []CRecord{crecords[0], crecords[1]}},
+		{[]CRecord{crecords[0], crecords[1], crecords[3]}, []CRecord{crecords[0], crecords[1]}},
+		{[]CRecord{crecords[0], crecords[2]}, []CRecord{crecords[0], crecords[2]}},
+		{[]CRecord{crecords[3], crecords[3]}, []CRecord{}},
+		{[]CRecord{}, []CRecord{}},
+		{[]CRecord{crecords[2]}, []CRecord{crecords[2]}},
+	}
+
+	fetcher := mockHttpFetch{}
+	for i, test := range tests {
+		got := FilterConcurrent(test.input, []string{}, &fetcher)
+		if !equalCRecords(got, test.want) {
+			t.Errorf("[%d] Filter with %v returned %v : want %v", i, test.input, got, test.want)
+		}
+	}
+}
+
 func TestExtractRCR(t *testing.T) {
 	var tests = []struct {
 		input string
@@ -315,6 +345,50 @@ func TestAddSublocation(t *testing.T) {
 	}
 }
 
+// benchmarks
+type mockHttpClient struct{}
+
+func (f *mockHttpClient) FetchAll(ppns []string) [][]byte {
+	return [][]byte{}
+}
+func (f *mockHttpClient) FetchPPN(ppn string, secretParam string) []byte {
+	return []byte{}
+}
+
+func (f *mockHttpClient) FetchRCR(ilns []string) []byte {
+	return []byte{}
+}
+
+func (f *mockHttpClient) FetchMarc(ppn string) []byte {
+	time.Sleep(10 * time.Millisecond)
+	return []byte{}
+}
+
+func BenchmarkFilter(b *testing.B) {
+	client := mockHttpClient{}
+	var crecords []CRecord
+	for i := 0; i < 250; i++ {
+		id := "ppn" + strconv.Itoa(i)
+		crecords = append(crecords, CRecord{PPN: id})
+	}
+	for i := 0; i < b.N; i++ {
+		Filter(crecords, []string{}, &client)
+	}
+}
+
+func BenchmarkFilterConcurrent(b *testing.B) {
+	client := mockHttpClient{}
+	var crecords []CRecord
+	for i := 0; i < 250; i++ {
+		id := "ppn" + strconv.Itoa(i)
+		crecords = append(crecords, CRecord{PPN: id})
+	}
+	for i := 0; i < b.N; i++ {
+		FilterConcurrent(crecords, []string{}, &client)
+	}
+}
+
+// helpers
 func makeBibRecords() map[string]BibRecord {
 	result := make(map[string]BibRecord)
 

@@ -15,6 +15,8 @@ const (
 	marcxml_url    = "https://www.sudoc.fr/"
 )
 
+const MAX_CONCURRENT_REQUESTS = 50
+
 type Fetcher interface {
 	FetchAll(ppns []string) [][]byte
 	FetchRCR(ilns []string) []byte
@@ -29,7 +31,7 @@ type HttpRequester func(string) []byte
 // Note that the SUDOC API ignores unknown PPNs when requested with a
 // muli-request.
 func (f *HttpFetch) FetchAll(ppns []string) [][]byte {
-	return fetchBatch(ppns, 20, fetch)
+	return fetchBatchConcurrent(ppns, 20, fetch)
 }
 
 // FetchRCR returns a XML iln2rcr response from a list of ILNs.
@@ -65,6 +67,7 @@ func fetch(url string) []byte {
 	return data
 }
 
+// TODO: remove sequential version when concurrent one is validated
 func fetchBatch(ppns []string, max_params int, request HttpRequester) [][]byte {
 	urls := buildURLs(ppns, max_params)
 	xmlBatch := make([][]byte, 0, len(urls))
@@ -76,6 +79,7 @@ func fetchBatch(ppns []string, max_params int, request HttpRequester) [][]byte {
 }
 
 func fetchBatchConcurrent(ppns []string, max_params int, request HttpRequester) [][]byte {
+	var tokens = make(chan struct{}, MAX_CONCURRENT_REQUESTS)
 	urls := buildURLs(ppns, max_params)
 	xmlBatch := make([][]byte, len(urls))
 	wg := sync.WaitGroup{}
@@ -83,8 +87,10 @@ func fetchBatchConcurrent(ppns []string, max_params int, request HttpRequester) 
 	for index, url := range urls {
 		wg.Add(1)
 		go func(i int, u string) {
+			tokens <- struct{}{}
 			defer wg.Done()
 			xmlBatch[i] = request(u)
+			<-tokens
 		}(index, url)
 	}
 	wg.Wait()
