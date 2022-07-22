@@ -2,9 +2,12 @@ package bib
 
 import (
 	"casl/marc"
+	"fmt"
 	"strconv"
 	"testing"
 	"time"
+
+	"casl/alma"
 )
 
 // Mocking the HttpFetcher
@@ -117,6 +120,18 @@ func TestGetSudocLocations(t *testing.T) {
 				i, test.ppns_input, test.rcrs_input, got, test.want)
 		}
 	}
+}
+
+// Mocking the AlmaClient
+type mockAlmaClient struct{}
+
+func (m mockAlmaClient) GetHoldingsFromPPN(ppn alma.PPN) ([]alma.Holding, error) {
+	return []alma.Holding{}, nil
+}
+
+func TestGetAlmaLocations(t *testing.T) {
+	client := mockAlmaClient{}
+	fmt.Println(client)
 }
 
 /*

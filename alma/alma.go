@@ -10,11 +10,15 @@ import (
 	"net/http"
 )
 
+type AlmaClient interface {
+	GetHoldingsFromPPN(ppn PPN) ([]Holding, error)
+}
+
 type Alma struct {
 	apiKey      string
 	baseURL     string
 	client      *http.Client
-	fetchClient fetcher
+	fetchClient Fetcher
 }
 
 type PPN string
@@ -48,10 +52,16 @@ func New(client *http.Client, apiKey, baseURL string) (*Alma, error) {
 	return alma, nil
 }
 
+// SetFetcher allows user to provide a custom Fetcher, for testing
+// purposes.
+func (a *Alma) SetFetcher(f Fetcher) {
+	a.fetchClient = f
+}
+
 // GetMMSfromPPN returns a list of MMS corresponding to the given PPN, or
 // NotFoundError.
 func (a *Alma) GetMMSfromPPN(ppn PPN) ([]MMS, error) {
-	data, err := a.fetch(a.buildURL(bibs_t, string(ppn)))
+	data, err := a.Fetch(a.buildURL(bibs_t, string(ppn)))
 	if err != nil { // HTTP errors, including NotFoundError
 		log.Printf("alma: GetMMSfromPPN: %v", err)
 		return nil, err
@@ -73,7 +83,7 @@ func (a *Alma) GetMMSfromPPN(ppn PPN) ([]MMS, error) {
 // GetHoldings returns a list of holdings, potentially empty, attached to the
 // given bib MMS id.
 func (a *Alma) GetHoldings(mms MMS) ([]Holding, error) {
-	data, err := a.fetch(a.buildURL(holdings_t, string(mms)))
+	data, err := a.Fetch(a.buildURL(holdings_t, string(mms)))
 	if err != nil {
 		log.Printf("alma: GetHoldings: %v", err)
 		return nil, err
@@ -116,15 +126,15 @@ func (a *Alma) buildURL(urlType int, id string) string {
 	}
 }
 
-type fetcher interface {
-	fetch(url string) ([]byte, error)
+type Fetcher interface {
+	Fetch(url string) ([]byte, error)
 }
 
 type almaFetcher struct {
 	client *http.Client
 }
 
-func (f *almaFetcher) fetch(url string) ([]byte, error) {
+func (f *almaFetcher) Fetch(url string) ([]byte, error) {
 	if url == "" {
 		return nil, &InvalidRequestError{errorMessage: "URL cannot be empty"}
 	}
@@ -147,8 +157,8 @@ func (f *almaFetcher) fetch(url string) ([]byte, error) {
 	return data, nil
 }
 
-func (a *Alma) fetch(url string) ([]byte, error) {
-	return a.fetchClient.fetch(url)
+func (a *Alma) Fetch(url string) ([]byte, error) {
+	return a.fetchClient.Fetch(url)
 }
 
 func ppnMatch(ids []string, ppn PPN) bool {

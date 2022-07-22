@@ -117,9 +117,9 @@ func TestFetch(t *testing.T) {
 	for i, test := range errorTests {
 		var err error
 		if test.url == "" {
-			_, err = alma.fetch(test.url)
+			_, err = alma.Fetch(test.url)
 		} else {
-			_, err = alma.fetch(server.URL + test.url)
+			_, err = alma.Fetch(server.URL + test.url)
 		}
 		if err != nil {
 			if reflect.TypeOf(err) != reflect.TypeOf(test.expectedError) {
@@ -135,7 +135,7 @@ func TestFetch(t *testing.T) {
 
 	// tests for status 200 responses
 	e := &NotFoundError{errorMessage: "identifier not found"}
-	_, err := alma.fetch(server.URL + "/200_count_0")
+	_, err := alma.Fetch(server.URL + "/200_count_0")
 	if err == nil || reflect.TypeOf(err) != reflect.TypeOf(e) {
 		t.Errorf("url %q returned %v error ; should be %q", "/200_count_0", reflect.TypeOf(err), reflect.TypeOf(e))
 	}
@@ -143,11 +143,11 @@ func TestFetch(t *testing.T) {
 		t.Errorf("url %q returned %q error message ; should be %q", "/200_count_0", err, "identifier not found")
 	}
 
-	_, err = alma.fetch(server.URL + "/200_count_1")
+	_, err = alma.Fetch(server.URL + "/200_count_1")
 	if err != nil {
 		t.Errorf("url %q returned error", "/200/count_1")
 	}
-	_, err = alma.fetch(server.URL + "/200_count_2")
+	_, err = alma.Fetch(server.URL + "/200_count_2")
 	if err != nil {
 		t.Errorf("url %q returned error", "/200/count_2")
 	}
@@ -258,7 +258,7 @@ func assertEqualString(t *testing.T, s1, s2 string) {
 
 type mockFetcher struct{}
 
-func (f *mockFetcher) fetch(url string) ([]byte, error) {
+func (f *mockFetcher) Fetch(url string) ([]byte, error) {
 	bibs0 := almawsURL + "bibs?view=brief&expand=None&other_system_id=" + "nonexistent" + "&apikey=" + "apikey"
 	bibs1 := almawsURL + "bibs?view=brief&expand=None&other_system_id=" + "bibsCount1" + "&apikey=" + "apikey"
 	bibs2 := almawsURL + "bibs?view=brief&expand=None&other_system_id=" + "bibsCount2" + "&apikey=" + "apikey"

@@ -5,8 +5,6 @@ import (
 	"casl/alma"
 	"casl/marc"
 	"casl/requests"
-	"log"
-	"net/http"
 	"strings"
 	"sync"
 )
@@ -38,11 +36,7 @@ func GetSudocLocations(ppns map[string]bool, rcrs []string, client requests.Fetc
 
 // GetAlmaLocations fetches locations and returns populated BibRecords
 // corresponding to the given SUDOC records.
-func GetAlmaLocations(bibs []BibRecord, secretParam string, rcrMap map[string]string) []BibRecord {
-	a, err := alma.New(&http.Client{}, secretParam, "")
-	if err != nil {
-		log.Fatalf("GetAlmaLocations: unable to initialize the Alma client: %v", err)
-	}
+func GetAlmaLocations(a alma.AlmaClient, bibs []BibRecord, rcrMap map[string]string) []BibRecord {
 	var result []BibRecord
 	for _, record := range bibs {
 		locations, err := a.GetHoldingsFromPPN(alma.PPN(record.ppn))

@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"time"
 
+	"casl/alma"
 	"casl/bib"
 	"casl/requests"
 )
@@ -76,7 +77,11 @@ func main() {
 	records := bib.GetSudocLocations(ppns, followedRCR, &httpFetcher)
 
 	// Alma processing
-	resultats := bib.GetAlmaLocations(records, conf.AlmaAPIKey, alma2rcr)
+	almaClient, err := alma.New(nil, conf.AlmaAPIKey, "")
+	if err != nil {
+		log.Fatalf("GetAlmaLocations: unable to initialize the Alma client: %v", err)
+	}
+	resultats := bib.GetAlmaLocations(almaClient, records, alma2rcr)
 
 	// End results comparison
 	anomalies := bib.Filter(bib.ComparePPN(resultats, conf.IgnoredAlmaColl), monolithicRCR, &httpFetcher)
