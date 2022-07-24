@@ -11,6 +11,10 @@ import (
 
 const MAX_CONCURRENT_REQUESTS = 50
 
+type AlmaClient interface {
+	GetHoldingsFromPPN(ppn alma.PPN) ([]alma.Holding, error)
+}
+
 // GetSudocLocations fetches locations and returns populated BibRecords
 // corresponding to the given ppns.
 func GetSudocLocations(ppns map[string]bool, rcrs []string, client requests.Fetcher) []BibRecord {
@@ -36,7 +40,7 @@ func GetSudocLocations(ppns map[string]bool, rcrs []string, client requests.Fetc
 
 // GetAlmaLocations fetches locations and returns populated BibRecords
 // corresponding to the given SUDOC records.
-func GetAlmaLocations(a alma.AlmaClient, bibs []BibRecord, rcrMap map[string]string) []BibRecord {
+func GetAlmaLocations(a AlmaClient, bibs []BibRecord, rcrMap map[string]string) []BibRecord {
 	var result []BibRecord
 	for _, record := range bibs {
 		locations, err := a.GetHoldingsFromPPN(alma.PPN(record.ppn))

@@ -2,7 +2,7 @@ package bib
 
 import (
 	"casl/marc"
-	"fmt"
+	"errors"
 	"strconv"
 	"testing"
 	"time"
@@ -126,52 +126,47 @@ func TestGetSudocLocations(t *testing.T) {
 type mockAlmaClient struct{}
 
 func (m mockAlmaClient) GetHoldingsFromPPN(ppn alma.PPN) ([]alma.Holding, error) {
-	return []alma.Holding{}, nil
+	result := []alma.Holding{}
+	switch ppn {
+	case "fetcherror":
+		return nil, errors.New("Fetch error")
+	case "oneloc":
+		result = append(result, alma.Holding{Library: "BIB1", Location: "LOC1"})
+	case "twoloc":
+		result = append(result, alma.Holding{Library: "BIB1", Location: "LOC1"})
+		result = append(result, alma.Holding{Library: "BIB2", Location: "LOC2"})
+	}
+	return result, nil
 }
 
 func TestGetAlmaLocations(t *testing.T) {
 	client := mockAlmaClient{}
-	fmt.Println(client)
-}
-
-/*
-// TODO: test GetAlmaLocations over alma client
-func TestGetAlmaLocations(t *testing.T) {
-	input := makeBibRecords()
-	expected := makeBibRecords()
-	var al []almaLocation
-	al = append(al, almaLocation{ownerCode: "BIB_TEST_1", collection: "LOC_TEST_1", rcr: "rcr000001"})
-	al = append(al, almaLocation{ownerCode: "BIB_TEST_2", collection: "LOC_TEST_2", rcr: "rcr000002"})
-	b := expected["br1"]
-	b.almaLocations = []almaLocation{al[0], al[1]}
-	expected["br1"] = b
-	b = expected["br_empty1"]
-	b.almaLocations = []almaLocation{al[0], al[1]}
-	expected["br_empty1"] = b
-
-	var tests = []struct {
-		input []BibRecord
-		want  []BibRecord
-	}{
-		{[]BibRecord{input["br1"]}, []BibRecord{expected["br1"]}},
-		{[]BibRecord{input["br_empty1"]}, []BibRecord{expected["br_empty1"]}},
-		{[]BibRecord{}, []BibRecord{}},
-		{[]BibRecord{input["br3"], input["br4"]}, []BibRecord{expected["br3"], expected["br4"]}},
+	input := []BibRecord{
+		{ppn: "noalmaloc"},
+		{ppn: "fetcherror"},
+		{ppn: "oneloc"},
+		{ppn: "twoloc"},
+	}
+	expected := []BibRecord{
+		{ppn: "noalmaloc", almaLocations: []almaLocation{}},
+		{ppn: "oneloc", almaLocations: []almaLocation{
+			{collection: "LOC1", ownerCode: "BIB1", rcr: "RCR1"},
+		}},
+		{ppn: "twoloc", almaLocations: []almaLocation{
+			{collection: "LOC1", ownerCode: "BIB1", rcr: "RCR1"},
+			{collection: "LOC2", ownerCode: "BIB2", rcr: "RCR2"},
+		}},
 	}
 
 	rcrs := make(map[string]string)
-	rcrs["BIB_TEST_1"] = "rcr000001"
-	rcrs["BIB_TEST_2"] = "rcr000002"
+	rcrs["BIB1"] = "RCR1"
+	rcrs["BIB2"] = "RCR2"
 
-	for i, test := range tests {
-		got := GetAlmaLocations(test.input, "key", rcrs)
-		if !equalBibRecords(got, test.want) {
-			t.Errorf("[%d] GetAlmaLocations with %v returned %v ; want %v",
-				i, test.input, got, test.want)
-		}
+	got := GetAlmaLocations(client, input, rcrs)
+	if !equalBibRecords(got, expected) {
+		t.Errorf("GetAlmaLocations with %v returned %v ; want %v", input, got, expected)
 	}
 }
-*/
 
 func TestGetRCRs(t *testing.T) {
 	var tests = []struct {

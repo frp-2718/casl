@@ -10,10 +10,6 @@ import (
 	"net/http"
 )
 
-type AlmaClient interface {
-	GetHoldingsFromPPN(ppn PPN) ([]Holding, error)
-}
-
 type Alma struct {
 	apiKey      string
 	baseURL     string
