@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"sort"
 	"strconv"
 	"time"
 
@@ -97,6 +98,15 @@ func writeCSV(results []bib.CRecord) {
 	var records [][]string
 	records = append(records, []string{"PPN", "ILN", "Bibliothèque Alma",
 		"Bibliothèque SUDOC", "RCR"})
+	sort.Slice(results, func(i, j int) bool {
+		if results[i].ILN != results[j].ILN {
+			return results[i].ILN < results[j].ILN
+		}
+		if results[i].RCR != results[j].ILN {
+			return results[i].RCR < results[j].RCR
+		}
+		return results[i].PPN < results[j].PPN
+	})
 	for _, res := range results {
 		var suffix string
 		if res.SUDOCSublocation != "" {
