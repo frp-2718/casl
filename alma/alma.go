@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
 )
 
 type Alma struct {
@@ -145,6 +146,10 @@ func (f *almaFetcher) Fetch(url string) ([]byte, error) {
 		return nil, errors.New("alma: fetch: read error")
 	}
 	if resp.StatusCode != http.StatusOK {
+		if resp.StatusCode == 429 {
+			time.Sleep(1 * time.Second)
+			return f.Fetch(url)
+		}
 		return nil, decodeError(data, resp.StatusCode)
 	} else if notFound(data) {
 		// TODO: add not found id to error

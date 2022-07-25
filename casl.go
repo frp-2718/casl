@@ -84,7 +84,7 @@ func main() {
 	resultats := bib.GetAlmaLocationsConcurrent(almaClient, records, alma2rcr)
 
 	// End results comparison
-	anomalies := bib.Filter(bib.ComparePPN(resultats, conf.IgnoredAlmaColl), monolithicRCR, &httpFetcher)
+	anomalies := bib.FilterConcurrent(bib.ComparePPN(resultats, conf.IgnoredAlmaColl), monolithicRCR, &httpFetcher)
 
 	writeCSV(anomalies)
 
