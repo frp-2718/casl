@@ -136,6 +136,7 @@ func (m mockAlmaClient) GetHoldingsFromPPN(ppn alma.PPN) ([]alma.Holding, error)
 		result = append(result, alma.Holding{Library: "BIB1", Location: "LOC1"})
 		result = append(result, alma.Holding{Library: "BIB2", Location: "LOC2"})
 	}
+	time.Sleep(10 * time.Millisecond)
 	return result, nil
 }
 
@@ -163,6 +164,35 @@ func TestGetAlmaLocations(t *testing.T) {
 	rcrs["BIB2"] = "RCR2"
 
 	got := GetAlmaLocations(client, input, rcrs)
+	if !equalBibRecords(got, expected) {
+		t.Errorf("GetAlmaLocations with %v returned %v ; want %v", input, got, expected)
+	}
+}
+
+func TestGetAlmaLocationsConcurrent(t *testing.T) {
+	client := mockAlmaClient{}
+	input := []BibRecord{
+		{ppn: "noalmaloc"},
+		{ppn: "fetcherror"},
+		{ppn: "oneloc"},
+		{ppn: "twoloc"},
+	}
+	expected := []BibRecord{
+		{ppn: "noalmaloc", almaLocations: []almaLocation{}},
+		{ppn: "oneloc", almaLocations: []almaLocation{
+			{collection: "LOC1", ownerCode: "BIB1", rcr: "RCR1"},
+		}},
+		{ppn: "twoloc", almaLocations: []almaLocation{
+			{collection: "LOC1", ownerCode: "BIB1", rcr: "RCR1"},
+			{collection: "LOC2", ownerCode: "BIB2", rcr: "RCR2"},
+		}},
+	}
+
+	rcrs := make(map[string]string)
+	rcrs["BIB1"] = "RCR1"
+	rcrs["BIB2"] = "RCR2"
+
+	got := GetAlmaLocationsConcurrent(client, input, rcrs)
 	if !equalBibRecords(got, expected) {
 		t.Errorf("GetAlmaLocations with %v returned %v ; want %v", input, got, expected)
 	}
@@ -395,6 +425,34 @@ func BenchmarkFilterConcurrent(b *testing.B) {
 	}
 	for i := 0; i < b.N; i++ {
 		FilterConcurrent(crecords, []string{}, &client)
+	}
+}
+
+func BenchmarkGetAlmaLocations(b *testing.B) {
+	client := mockAlmaClient{}
+	rcrs := make(map[string]string)
+	rcrs["BIB1"] = "RCR1"
+	rcrs["BIB2"] = "RCR2"
+	var brecords []BibRecord
+	for i := 0; i < 250; i++ {
+		brecords = append(brecords, BibRecord{ppn: "twoloc"})
+	}
+	for i := 0; i < b.N; i++ {
+		GetAlmaLocations(client, brecords, rcrs)
+	}
+}
+
+func BenchmarkGetAlmaLocationsConcurrent(b *testing.B) {
+	client := mockAlmaClient{}
+	rcrs := make(map[string]string)
+	rcrs["BIB1"] = "RCR1"
+	rcrs["BIB2"] = "RCR2"
+	var brecords []BibRecord
+	for i := 0; i < 250; i++ {
+		brecords = append(brecords, BibRecord{ppn: "twoloc"})
+	}
+	for i := 0; i < b.N; i++ {
+		GetAlmaLocationsConcurrent(client, brecords, rcrs)
 	}
 }
 

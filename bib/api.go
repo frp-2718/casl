@@ -63,6 +63,45 @@ func GetAlmaLocations(a AlmaClient, bibs []BibRecord, rcrMap map[string]string) 
 	return result
 }
 
+// GetAlmaLocations fetches locations and returns populated BibRecords
+// corresponding to the given SUDOC records.
+func GetAlmaLocationsConcurrent(a AlmaClient, bibs []BibRecord, rcrMap map[string]string) []BibRecord {
+	var tokens = make(chan struct{}, MAX_CONCURRENT_REQUESTS)
+	wg := sync.WaitGroup{}
+	var mu = &sync.Mutex{}
+	var result []BibRecord
+
+	for _, record := range bibs {
+		wg.Add(1)
+		go func(record BibRecord) {
+			tokens <- struct{}{}
+			defer wg.Done()
+			locations, err := a.GetHoldingsFromPPN(alma.PPN(record.ppn))
+			if err != nil {
+				// TODO: handle fetch errors
+				<-tokens
+				return // ignore errors
+			}
+			record.almaLocations = convertLocations(locations)
+
+			var newLocations []almaLocation
+			// If there are no locations in Alma, len(record.almaLocations) == 0.
+			for _, l := range record.almaLocations {
+				nl := almaLocation{ownerCode: l.ownerCode, collection: l.collection,
+					rcr: rcrMap[l.ownerCode]}
+				newLocations = append(newLocations, nl)
+			}
+			record.almaLocations = newLocations
+			mu.Lock()
+			result = append(result, record)
+			mu.Unlock()
+			<-tokens
+		}(record)
+	}
+	wg.Wait()
+	return result
+}
+
 // GetRCRs returns a slice of RCRs as strings from a slice of ILNs.
 func GetRCRs(ilns []string, client requests.Fetcher) ([]string, error) {
 	xmldata := client.FetchRCR(ilns)

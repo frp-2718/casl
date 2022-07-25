@@ -81,7 +81,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("GetAlmaLocations: unable to initialize the Alma client: %v", err)
 	}
-	resultats := bib.GetAlmaLocations(almaClient, records, alma2rcr)
+	resultats := bib.GetAlmaLocationsConcurrent(almaClient, records, alma2rcr)
 
 	// End results comparison
 	anomalies := bib.Filter(bib.ComparePPN(resultats, conf.IgnoredAlmaColl), monolithicRCR, &httpFetcher)

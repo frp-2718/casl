@@ -1,5 +1,6 @@
 package bib
 
+// TODO: rewrite ALL UTILITY FUNCTIONS
 func in(s string, ens []string) bool {
 	for _, elem := range ens {
 		if s == elem {
@@ -42,8 +43,16 @@ func equalBibRecords(b1, b2 []BibRecord) bool {
 	if len(b1) != len(b2) {
 		return false
 	}
-	for i, record := range b1 {
-		if !equalBibRecord(record, b2[i]) {
+	flag := false
+	for _, r1 := range b1 {
+		flag = false
+		for _, r2 := range b2 {
+			if equalBibRecord(r1, r2) {
+				flag = true
+				break
+			}
+		}
+		if !flag {
 			return false
 		}
 	}
@@ -75,13 +84,16 @@ func equalCRecords(c1, c2 []CRecord) bool {
 	if len(c1) != len(c2) {
 		return false
 	}
+	flag := false
 	for _, record1 := range c1 {
+		flag = false
 		for _, record2 := range c2 {
 			if equalCRecord(record1, record2) {
+				flag = true
 				break
-			} else {
-				continue
 			}
+		}
+		if !flag {
 			return false
 		}
 	}
