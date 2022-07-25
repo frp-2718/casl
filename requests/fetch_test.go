@@ -82,36 +82,36 @@ func TestFetchBatch(t *testing.T) {
 	}
 }
 
-func TestFetchBatchConcurrent(t *testing.T) {
-	max_params := 1
-	var ppns []string
-	var result [][]byte
-	for i := 0; i < 100; i++ {
-		ppn := "ppn" + strconv.Itoa(i)
-		ppns = append(ppns, ppn)
-		result = append(result, []byte(ppn))
-	}
-	var tests = []struct {
-		ppns []string
-		want [][]byte
-	}{
-		{[]string{}, [][]byte{}},
-		{[]string{"ppn1"}, [][]byte{[]byte("ppn1")}},
-		{[]string{"ppn1", "ppn2"}, [][]byte{[]byte("ppn1"), []byte("ppn2")}},
-		{ppns, result},
-	}
+// func TestFetchBatchConcurrent(t *testing.T) {
+// 	max_params := 1
+// 	var ppns []string
+// 	var result [][]byte
+// 	for i := 0; i < 100; i++ {
+// 		ppn := "ppn" + strconv.Itoa(i)
+// 		ppns = append(ppns, ppn)
+// 		result = append(result, []byte(ppn))
+// 	}
+// 	var tests = []struct {
+// 		ppns []string
+// 		want [][]byte
+// 	}{
+// 		{[]string{}, [][]byte{}},
+// 		{[]string{"ppn1"}, [][]byte{[]byte("ppn1")}},
+// 		{[]string{"ppn1", "ppn2"}, [][]byte{[]byte("ppn1"), []byte("ppn2")}},
+// 		{ppns, result},
+// 	}
 
-	for i, test := range tests {
-		wanted := wantedLength(len(test.ppns), max_params)
-		got := fetchBatchConcurrent(test.ppns, max_params, mockHttpRequester)
-		if len(got) != wanted {
-			t.Errorf("[%d] fetchBatch(%v) result has wrong lentgh : got %v", i, test.ppns, got)
-		}
-		if equalSlicesOfSlicesOfBytes(got, test.want) {
-			t.Errorf("[%d] fetchBatch(%v) returned %v : want %v", i, test.ppns, got, test.want)
-		}
-	}
-}
+// 	for i, test := range tests {
+// 		wanted := wantedLength(len(test.ppns), max_params)
+// 		got := fetchBatchConcurrent(test.ppns, max_params, mockHttpRequester)
+// 		if len(got) != wanted {
+// 			t.Errorf("[%d] fetchBatch(%v) result has wrong lentgh : got %v", i, test.ppns, got)
+// 		}
+// 		if equalSlicesOfSlicesOfBytes(got, test.want) {
+// 			t.Errorf("[%d] fetchBatch(%v) returned %v : want %v", i, test.ppns, got, test.want)
+// 		}
+// 	}
+// }
 
 func BenchmarkFetchBatch(b *testing.B) {
 	var ppns []string
@@ -120,16 +120,6 @@ func BenchmarkFetchBatch(b *testing.B) {
 	}
 	for i := 0; i < b.N; i++ {
 		fetchBatch(ppns, 1, mockHttpRequester)
-	}
-}
-
-func BenchmarkFetchBatchConcurrent(b *testing.B) {
-	var ppns []string
-	for i := 0; i < 1000; i++ {
-		ppns = append(ppns, "ppn"+strconv.Itoa(i))
-	}
-	for i := 0; i < b.N; i++ {
-		fetchBatchConcurrent(ppns, 1, mockHttpRequester)
 	}
 }
 

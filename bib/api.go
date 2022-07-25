@@ -41,31 +41,6 @@ func GetSudocLocations(ppns map[string]bool, rcrs []string, client requests.Fetc
 // GetAlmaLocations fetches locations and returns populated BibRecords
 // corresponding to the given SUDOC records.
 func GetAlmaLocations(a AlmaClient, bibs []BibRecord, rcrMap map[string]string) []BibRecord {
-	var result []BibRecord
-	for _, record := range bibs {
-		locations, err := a.GetHoldingsFromPPN(alma.PPN(record.ppn))
-		if err != nil {
-			// TODO: handle fetch errors
-			continue // ignore errors
-		}
-		record.almaLocations = convertLocations(locations)
-
-		var newLocations []almaLocation
-		// If there are no locations in Alma, len(record.almaLocations) == 0.
-		for _, l := range record.almaLocations {
-			nl := almaLocation{ownerCode: l.ownerCode, collection: l.collection,
-				rcr: rcrMap[l.ownerCode]}
-			newLocations = append(newLocations, nl)
-		}
-		record.almaLocations = newLocations
-		result = append(result, record)
-	}
-	return result
-}
-
-// GetAlmaLocations fetches locations and returns populated BibRecords
-// corresponding to the given SUDOC records.
-func GetAlmaLocationsConcurrent(a AlmaClient, bibs []BibRecord, rcrMap map[string]string) []BibRecord {
 	var tokens = make(chan struct{}, MAX_CONCURRENT_REQUESTS)
 	wg := sync.WaitGroup{}
 	var mu = &sync.Mutex{}
@@ -137,34 +112,7 @@ func ComparePPN(records []BibRecord, ignoredCollections []string) []CRecord {
 	return results
 }
 
-// Filter builds a list of CRecord by filtering the given list according to
-// some very specific criterions.
 func Filter(records []CRecord, monoRCRs []string, client requests.Fetcher) []CRecord {
-	var res []CRecord
-	for _, record := range records {
-		marcxml := client.FetchMarc(record.PPN)
-		marcrecord, err := marc.NewRecord(marcxml)
-		if err != nil {
-			//log.Printf("bib.Filter: unable to create MARC record from PPN %s", record.PPN)
-			// this is always safe to ignore errors and pretend that the record
-			// should not be filtered
-			res = append(res, record)
-			continue
-		}
-		class := marcrecord.GetField("008")[0].GetValue("")[0]
-		// Exclusion of electronic resources
-		if !strings.HasPrefix(class, "O") {
-			// Add sublocations for some monolithic RCRs
-			if record.SUDOCLibrary != "" && in(record.RCR, monoRCRs) {
-				addSublocation(&record, marcrecord)
-			}
-			res = append(res, record)
-		}
-	}
-	return res
-}
-
-func FilterConcurrent(records []CRecord, monoRCRs []string, client requests.Fetcher) []CRecord {
 	var tokens = make(chan struct{}, MAX_CONCURRENT_REQUESTS)
 	var res []CRecord
 	wg := sync.WaitGroup{}

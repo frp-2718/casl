@@ -169,35 +169,6 @@ func TestGetAlmaLocations(t *testing.T) {
 	}
 }
 
-func TestGetAlmaLocationsConcurrent(t *testing.T) {
-	client := mockAlmaClient{}
-	input := []BibRecord{
-		{ppn: "noalmaloc"},
-		{ppn: "fetcherror"},
-		{ppn: "oneloc"},
-		{ppn: "twoloc"},
-	}
-	expected := []BibRecord{
-		{ppn: "noalmaloc", almaLocations: []almaLocation{}},
-		{ppn: "oneloc", almaLocations: []almaLocation{
-			{collection: "LOC1", ownerCode: "BIB1", rcr: "RCR1"},
-		}},
-		{ppn: "twoloc", almaLocations: []almaLocation{
-			{collection: "LOC1", ownerCode: "BIB1", rcr: "RCR1"},
-			{collection: "LOC2", ownerCode: "BIB2", rcr: "RCR2"},
-		}},
-	}
-
-	rcrs := make(map[string]string)
-	rcrs["BIB1"] = "RCR1"
-	rcrs["BIB2"] = "RCR2"
-
-	got := GetAlmaLocationsConcurrent(client, input, rcrs)
-	if !equalBibRecords(got, expected) {
-		t.Errorf("GetAlmaLocations with %v returned %v ; want %v", input, got, expected)
-	}
-}
-
 func TestGetRCRs(t *testing.T) {
 	var tests = []struct {
 		input []string
@@ -313,34 +284,6 @@ func TestFilter(t *testing.T) {
 	}
 }
 
-func TestFilterConcurrent(t *testing.T) {
-	var crecords []CRecord
-	crecords = append(crecords, CRecord{PPN: "ppn_ok1"})
-	crecords = append(crecords, CRecord{PPN: "ppn_ok2"})
-	crecords = append(crecords, CRecord{PPN: "ppn_err"})
-	crecords = append(crecords, CRecord{PPN: "ppn_elec"})
-
-	var tests = []struct {
-		input []CRecord
-		want  []CRecord
-	}{
-		{[]CRecord{crecords[0], crecords[1]}, []CRecord{crecords[0], crecords[1]}},
-		{[]CRecord{crecords[0], crecords[1], crecords[3]}, []CRecord{crecords[0], crecords[1]}},
-		{[]CRecord{crecords[0], crecords[2]}, []CRecord{crecords[0], crecords[2]}},
-		{[]CRecord{crecords[3], crecords[3]}, []CRecord{}},
-		{[]CRecord{}, []CRecord{}},
-		{[]CRecord{crecords[2]}, []CRecord{crecords[2]}},
-	}
-
-	fetcher := mockHttpFetch{}
-	for i, test := range tests {
-		got := FilterConcurrent(test.input, []string{}, &fetcher)
-		if !equalCRecords(got, test.want) {
-			t.Errorf("[%d] Filter with %v returned %v : want %v", i, test.input, got, test.want)
-		}
-	}
-}
-
 func TestExtractRCR(t *testing.T) {
 	var tests = []struct {
 		input string
@@ -416,18 +359,6 @@ func BenchmarkFilter(b *testing.B) {
 	}
 }
 
-func BenchmarkFilterConcurrent(b *testing.B) {
-	client := mockHttpClient{}
-	var crecords []CRecord
-	for i := 0; i < 250; i++ {
-		id := "ppn" + strconv.Itoa(i)
-		crecords = append(crecords, CRecord{PPN: id})
-	}
-	for i := 0; i < b.N; i++ {
-		FilterConcurrent(crecords, []string{}, &client)
-	}
-}
-
 func BenchmarkGetAlmaLocations(b *testing.B) {
 	client := mockAlmaClient{}
 	rcrs := make(map[string]string)
@@ -439,20 +370,6 @@ func BenchmarkGetAlmaLocations(b *testing.B) {
 	}
 	for i := 0; i < b.N; i++ {
 		GetAlmaLocations(client, brecords, rcrs)
-	}
-}
-
-func BenchmarkGetAlmaLocationsConcurrent(b *testing.B) {
-	client := mockAlmaClient{}
-	rcrs := make(map[string]string)
-	rcrs["BIB1"] = "RCR1"
-	rcrs["BIB2"] = "RCR2"
-	var brecords []BibRecord
-	for i := 0; i < 250; i++ {
-		brecords = append(brecords, BibRecord{ppn: "twoloc"})
-	}
-	for i := 0; i < b.N; i++ {
-		GetAlmaLocationsConcurrent(client, brecords, rcrs)
 	}
 }
 

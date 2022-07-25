@@ -31,7 +31,7 @@ type HttpRequester func(string) []byte
 // Note that the SUDOC API ignores unknown PPNs when requested with a
 // muli-request.
 func (f *HttpFetch) FetchAll(ppns []string) [][]byte {
-	return fetchBatchConcurrent(ppns, 20, fetch)
+	return fetchBatch(ppns, 20, fetch)
 }
 
 // FetchRCR returns a XML iln2rcr response from a list of ILNs.
@@ -67,18 +67,7 @@ func fetch(url string) []byte {
 	return data
 }
 
-// TODO: remove sequential version when concurrent one is validated
 func fetchBatch(ppns []string, max_params int, request HttpRequester) [][]byte {
-	urls := buildURLs(ppns, max_params)
-	xmlBatch := make([][]byte, 0, len(urls))
-
-	for _, url := range urls {
-		xmlBatch = append(xmlBatch, request(url))
-	}
-	return xmlBatch
-}
-
-func fetchBatchConcurrent(ppns []string, max_params int, request HttpRequester) [][]byte {
 	var tokens = make(chan struct{}, MAX_CONCURRENT_REQUESTS)
 	urls := buildURLs(ppns, max_params)
 	xmlBatch := make([][]byte, len(urls))
