@@ -147,6 +147,8 @@ func (f *almaFetcher) Fetch(url string) ([]byte, error) {
 		return nil, errors.New("alma: fetch: read error")
 	}
 	if resp.StatusCode != http.StatusOK {
+		// TODO: optimize number of concurrent requests to minimize the number
+		// of 429
 		if resp.StatusCode == 429 {
 			time.Sleep(1 * time.Second)
 			return f.Fetch(url)

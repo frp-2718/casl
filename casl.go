@@ -74,6 +74,7 @@ func main() {
 	}
 	fmt.Printf("%d PPN à vérifier...\n", len(ppns))
 
+	// TODO: concurrent pipeline
 	// SUDOC processing
 	records := bib.GetSudocLocations(ppns, followedRCR, &httpFetcher)
 
@@ -94,7 +95,6 @@ func main() {
 }
 
 func writeCSV(results []bib.CRecord) {
-	// TODO: sort results iln>rcr>ppn
 	var records [][]string
 	records = append(records, []string{"PPN", "ILN", "Bibliothèque Alma",
 		"Bibliothèque SUDOC", "RCR"})
