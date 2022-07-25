@@ -34,8 +34,9 @@ func New(client *http.Client, apiKey, baseURL string) (*Alma, error) {
 		return nil, errors.New("New: illegal argument")
 	}
 	if client == nil {
-		// TODO: set default client timeout
-		client = http.DefaultClient
+		client = &http.Client{
+			Timeout: time.Second * 10,
+		}
 	}
 	alma := new(Alma)
 	alma.client = client
