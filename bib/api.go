@@ -20,13 +20,7 @@ type AlmaClient interface {
 func GetSudocLocations(ppns map[string]bool, rcrs []string, client requests.Fetcher) []BibRecord {
 	var records []BibRecord
 
-	// TODO: improve that and make a function
-	// We need a slice from the set of ppns.
-	ppnsList := make([]string, 0, len(ppns))
-
-	for key := range ppns {
-		ppnsList = append(ppnsList, key)
-	}
+	ppnsList := mapKeys(ppns)
 
 	for _, data := range client.FetchAll(ppnsList) {
 		sudocLoc, err := decodeLocations(data, rcrs)
@@ -220,3 +214,13 @@ func removeElem(locations []almaLocation, ignored []string) []almaLocation {
 	}
 	return result
 }
+
+func mapKeys[K comparable, V any](m map[K]V) []K {
+	r := make([]K, 0, len(m))
+	for k := range m {
+		r = append(r, k)
+	}
+	return r
+}
+
+// TODO: package utils ?
