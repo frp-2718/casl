@@ -64,7 +64,7 @@ func decodeError(data []byte, status int) error {
 		}
 	case 429:
 		if e.ErrorCode == "PER_SECOND_THRESHOLD" || e.ErrorCode == "DAILY_THRESHOLD" {
-			return &ThresholdError{errorMessage: e.ErrorMessage}
+			return &ThresholdError{errorMessage: e.ErrorCode}
 		}
 	case 500:
 		if e.ErrorCode == "GENERAL_ERROR" {

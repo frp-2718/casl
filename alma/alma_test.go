@@ -134,13 +134,13 @@ func TestFetch(t *testing.T) {
 	}
 
 	// tests for status 200 responses
-	e := &NotFoundError{errorMessage: "identifier not found"}
+	e := &NotFoundError{id: server.URL + "/200_count_0", errorMessage: "identifier not found"}
 	_, err := alma.Fetch(server.URL + "/200_count_0")
 	if err == nil || reflect.TypeOf(err) != reflect.TypeOf(e) {
 		t.Errorf("url %q returned %v error ; should be %q", "/200_count_0", reflect.TypeOf(err), reflect.TypeOf(e))
 	}
-	if err != nil && err.Error() != "identifier not found" {
-		t.Errorf("url %q returned %q error message ; should be %q", "/200_count_0", err, "identifier not found")
+	if err != nil && err.Error() != e.Error() {
+		t.Errorf("url %q returned %q error message ; should be %q", "/200_count_0", err, e.Error())
 	}
 
 	_, err = alma.Fetch(server.URL + "/200_count_1")

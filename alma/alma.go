@@ -5,6 +5,7 @@ package alma
 
 import (
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -138,25 +139,25 @@ func (f *almaFetcher) Fetch(url string) ([]byte, error) {
 	}
 	resp, err := f.client.Get(url)
 	if err != nil {
-		// TODO: retry timeout queries
-		return nil, errors.New("alma: fetch: http error")
+		return nil, fmt.Errorf("alma>fetch: http error: %w", err)
 	}
 	defer resp.Body.Close()
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, errors.New("alma: fetch: read error")
+		return nil, fmt.Errorf("alma>fetch: read error: %w", err)
 	}
 	if resp.StatusCode != http.StatusOK {
+		err := decodeError(data, resp.StatusCode)
 		// TODO: optimize number of concurrent requests to minimize the number
 		// of 429
-		if resp.StatusCode == 429 {
+		if resp.StatusCode == 429 && err.Error() == "PER_SECOND_THRESHOLD" {
+			log.Printf("alma>fetch: HTTP 429 PER_SECOND_THRESHOLD: %s", url)
 			time.Sleep(1 * time.Second)
 			return f.Fetch(url)
 		}
-		return nil, decodeError(data, resp.StatusCode)
+		return nil, err
 	} else if notFound(data) {
-		// TODO: add not found id to error
-		return nil, &NotFoundError{errorMessage: "identifier not found"}
+		return nil, &NotFoundError{id: url, errorMessage: "identifier not found"}
 	}
 	return data, nil
 }

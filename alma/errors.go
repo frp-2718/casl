@@ -1,5 +1,7 @@
 package alma
 
+import "fmt"
+
 // UnauthorizedError occurs when API key is wrong or IP is banned.
 type UnauthorizedError struct {
 	errorMessage string
@@ -30,11 +32,12 @@ func (e *ServerError) Error() string {
 
 // NotFoundError occurs when the requested resource does not exist.
 type NotFoundError struct {
+	id           string
 	errorMessage string
 }
 
 func (e *NotFoundError) Error() string {
-	return e.errorMessage
+	return fmt.Sprintf("id %s: %v", e.id, e.errorMessage)
 }
 
 // ThresholdError occurs when the number of concurrent requests hits the Alma
