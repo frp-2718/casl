@@ -62,7 +62,9 @@ func GetAlmaLocations(a AlmaClient, bibs []BibRecord, rcrMap map[string]string) 
 					rcr: rcrMap[l.ownerCode]}
 				newLocations = append(newLocations, nl)
 			}
-			record.almaLocations = newLocations
+			if len(newLocations) > 0 {
+				record.almaLocations = newLocations
+			}
 			mu.Lock()
 			result = append(result, record)
 			mu.Unlock()

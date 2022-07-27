@@ -3,6 +3,8 @@ package bib
 import (
 	"casl/marc"
 	"errors"
+	"reflect"
+	"sort"
 	"strconv"
 	"testing"
 	"time"
@@ -54,10 +56,10 @@ func (f *mockHttpFetch) FetchPPN(ppn string, secretParam string) []byte {
 func (f *mockHttpFetch) FetchRCR(ilns []string) []byte {
 	input := []string{"INVALID", "ILN02"}
 	invalid := []string{"INVALID"}
-	if len(ilns) == 0 || equalStrings(ilns, invalid) {
+	if len(ilns) == 0 || slices.Compare(ilns, invalid) == 0 {
 		return fakeIln2rcrError
 	}
-	if equalStrings(ilns, input) {
+	if slices.Compare(ilns, input) == 0 {
 		return fakeIln2rcr_2
 	}
 	return fakeIln2rcr
@@ -103,14 +105,14 @@ func TestGetSudocLocations(t *testing.T) {
 		rcrs_input []string
 		want       []BibRecord
 	}{
-		{nil, rcrs_valid, []BibRecord{}},
+		{nil, rcrs_valid, []BibRecord(nil)},
 		{ppns_valid, nil, []BibRecord{expected["br_empty1"], expected["br_empty2"], expected["br_empty3"]}},
-		{ppns_empty, rcrs_valid, []BibRecord{}},
+		{ppns_empty, rcrs_valid, []BibRecord(nil)},
 		{ppns_valid, rcrs_empty, []BibRecord{expected["br_empty1"], expected["br_empty2"], expected["br_empty3"]}},
 		{ppns_valid, rcrs_semiInvalid, []BibRecord{expected["br1"], expected["br3"], expected["br4"]}},
 		{ppns_valid, rcrs_invalid, []BibRecord{expected["br_empty1"], expected["br_empty2"], expected["br_empty3"]}},
 		{ppns_valid, rcrs_valid, []BibRecord{expected["br2"], expected["br3"], expected["br4"]}},
-		{ppns_invalid, rcrs_valid, []BibRecord{}},
+		{ppns_invalid, rcrs_valid, []BibRecord(nil)},
 		{ppns_semiInvalid, rcrs_valid, []BibRecord{expected["br2"]}},
 	}
 
@@ -151,7 +153,7 @@ func TestGetAlmaLocations(t *testing.T) {
 		{ppn: "twoloc"},
 	}
 	expected := []BibRecord{
-		{ppn: "noalmaloc", almaLocations: []almaLocation{}},
+		{ppn: "noalmaloc", almaLocations: []almaLocation(nil)},
 		{ppn: "oneloc", almaLocations: []almaLocation{
 			{collection: "LOC1", ownerCode: "BIB1", rcr: "RCR1"},
 		}},
@@ -186,7 +188,7 @@ func TestGetRCRs(t *testing.T) {
 	fetcher := mockHttpFetch{}
 	for i, test := range tests {
 		got, _ := GetRCRs(test.input, &fetcher)
-		if !equalStrings(got, test.want) {
+		if slices.Compare(got, test.want) != 0 {
 			t.Errorf("[%d] GetRCRs with %v returned %v : want %v", i, test.input, got, test.want)
 		}
 	}
@@ -243,14 +245,15 @@ func TestComparePPN(t *testing.T) {
 		input []BibRecord
 		want  []CRecord
 	}{
-		{[]BibRecord{}, []CRecord{}},
-		{match, []CRecord{}},
+		{[]BibRecord{}, []CRecord(nil)},
+		{match, []CRecord(nil)},
 		{nomatch, cr_alma},
 		{onlysu, cr_sudoc},
 		{allignored, cr_ignored},
 	}
 	for i, test := range tests {
 		got := ComparePPN(test.input, []string{"ignored", "ignored2"})
+		//if !equalCRecords(test.want, got) {
 		if !equalCRecords(test.want, got) {
 			t.Errorf("[%d] ComparePPN with %v returned %v : want %v", i, test.input,
 				got, test.want)
@@ -272,8 +275,8 @@ func TestFilter(t *testing.T) {
 		{[]CRecord{crecords[0], crecords[1]}, []CRecord{crecords[0], crecords[1]}},
 		{[]CRecord{crecords[0], crecords[1], crecords[3]}, []CRecord{crecords[0], crecords[1]}},
 		{[]CRecord{crecords[0], crecords[2]}, []CRecord{crecords[0], crecords[2]}},
-		{[]CRecord{crecords[3], crecords[3]}, []CRecord{}},
-		{[]CRecord{}, []CRecord{}},
+		{[]CRecord{crecords[3], crecords[3]}, []CRecord(nil)},
+		{[]CRecord{}, []CRecord(nil)},
 		{[]CRecord{crecords[2]}, []CRecord{crecords[2]}},
 	}
 
@@ -393,4 +396,24 @@ func makeBibRecords() map[string]BibRecord {
 	result["br4"] = BibRecord{ppn: "ppn000003", sudocLocations: []sudocLocation{sl1}}
 
 	return result
+}
+
+func equalBibRecords(b1, b2 []BibRecord) bool {
+	sort.Slice(b1, func(i, j int) bool {
+		return b1[i].ppn < b1[j].ppn
+	})
+	sort.Slice(b2, func(i, j int) bool {
+		return b2[i].ppn < b2[j].ppn
+	})
+	return reflect.DeepEqual(b1, b2)
+}
+
+func equalCRecords(c1, c2 []CRecord) bool {
+	sort.Slice(c1, func(i, j int) bool {
+		return c1[i].PPN < c1[j].PPN
+	})
+	sort.Slice(c2, func(i, j int) bool {
+		return c2[i].PPN < c2[j].PPN
+	})
+	return reflect.DeepEqual(c1, c2)
 }

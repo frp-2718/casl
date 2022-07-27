@@ -106,7 +106,9 @@ func decodeLocations(xmldata []byte, rcrs []string) ([]BibRecord, error) {
 				}
 			}
 		}
-		record.sudocLocations = locations
+		if len(locations) > 0 {
+			record.sudocLocations = locations
+		}
 		records = append(records, record)
 	}
 	return records, nil

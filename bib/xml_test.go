@@ -3,6 +3,8 @@ package bib
 import (
 	"strings"
 	"testing"
+
+	"golang.org/x/exp/slices"
 )
 
 func TestDecodeAlmaXML(t *testing.T) {
@@ -122,7 +124,7 @@ func TestDecodeRCR(t *testing.T) {
 		if err != nil {
 			t.Errorf("decodeRCR(%q) returned error: %s", test.input, err)
 		}
-		if !equalStrings(got, test.want) {
+		if slices.Compare(got, test.want) != 0 {
 			t.Errorf("decodeRCR: want %v, got %v", test.want, got)
 		}
 	}
