@@ -226,5 +226,3 @@ func mapKeys[K comparable, V any](m map[K]V) []K {
 	}
 	return r
 }
-
-// TODO: package utils ?

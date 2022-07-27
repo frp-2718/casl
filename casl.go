@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"regexp"
 	"sort"
 	"strconv"
 	"time"
@@ -65,10 +66,14 @@ func main() {
 		defer f.Close()
 		scanner := bufio.NewScanner(f)
 
-		// Assume one valid ppn per line.
-		// TODO: add validation test
+		// Discard invalid ppns.
+		var ppnPattern = regexp.MustCompile(`[0-9]{8}([0-9]|(x|X))`)
 		for scanner.Scan() {
-			ppns[scanner.Text()] = true
+			if line := scanner.Text(); ppnPattern.Match([]byte(line)) {
+				ppns[scanner.Text()] = true
+			} else {
+				log.Printf("invalid PPN: %s", line)
+			}
 		}
 		if err := scanner.Err(); err != nil {
 			log.Fatal(err)
