@@ -7,6 +7,8 @@ import (
 	"casl/requests"
 	"strings"
 	"sync"
+
+	"golang.org/x/exp/slices"
 )
 
 const MAX_CONCURRENT_REQUESTS = 50
@@ -133,7 +135,7 @@ func Filter(records []CRecord, monoRCRs []string, client requests.Fetcher) []CRe
 			// Exclusion of electronic resources
 			if !strings.HasPrefix(class, "O") {
 				// Add sublocations for some monolithic RCRs
-				if r.SUDOCLibrary != "" && in(r.RCR, monoRCRs) {
+				if r.SUDOCLibrary != "" && slices.Contains(monoRCRs, r.RCR) {
 					addSublocation(&r, marcrecord)
 				}
 				mu.Lock()
@@ -157,7 +159,7 @@ func addSublocation(r *CRecord, m *marc.Record) {
 				sep = ", "
 			}
 			if sublocation := f.GetValue("c"); sublocation != nil {
-				if !in(sublocation[0], sublocations) {
+				if !slices.Contains(sublocations, sublocation[0]) {
 					sublocations = append(sublocations, sublocation[0])
 					r.SUDOCSublocation = r.SUDOCSublocation + sep + sublocation[0]
 				}
@@ -208,7 +210,7 @@ func removeIgnored(records []BibRecord, ignored []string) []BibRecord {
 func removeElem(locations []almaLocation, ignored []string) []almaLocation {
 	var result []almaLocation
 	for _, loc := range locations {
-		if !in(loc.collection, ignored) {
+		if !slices.Contains(ignored, loc.collection) {
 			result = append(result, loc)
 		}
 	}

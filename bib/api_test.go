@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"casl/alma"
+
+	"golang.org/x/exp/slices"
 )
 
 // Mocking the HttpFetcher
@@ -18,7 +20,7 @@ func (f *mockHttpFetch) FetchAll(ppns []string) [][]byte {
 		return [][]byte{}
 	}
 	invalid := []string{"invalid1", "invalid2", "invalid3"}
-	if in(ppns[0], invalid) && in(ppns[1], invalid) && in(ppns[2], invalid) {
+	if slices.Contains(invalid, ppns[0]) && slices.Contains(invalid, ppns[1]) && slices.Contains(invalid, ppns[2]) {
 		return [][]byte{[]byte(`<?xml version="1.0" encoding="UTF-8"?>
 			<sudoc service="multiwhere">
 			<error>Found a null xml in result : values={ppn=PPNTEST}, query=select autorites.MULTIWHERE(#ppn#) from dual </error>
@@ -26,16 +28,16 @@ func (f *mockHttpFetch) FetchAll(ppns []string) [][]byte {
 	}
 	semi := []string{"invalid1", "invalid2"}
 	// ppns[0] invalid
-	if in(ppns[0], semi) {
+	if slices.Contains(semi, ppns[0]) {
 		// one of the two ppns must be invalid and the other valid
-		if (in(ppns[1], semi) && ppns[2] == "ppn000001") ||
-			(ppns[1] == "ppn000001" && in(ppns[2], semi)) {
+		if (slices.Contains(semi, ppns[1]) && ppns[2] == "ppn000001") ||
+			(ppns[1] == "ppn000001" && slices.Contains(semi, ppns[2])) {
 			return mwsemi
 		}
 		// ppns[0] valid
 	} else if ppns[0] == "ppn000001" {
 		// the two remaining ppns must be invalid
-		if in(ppns[1], semi) && in(ppns[2], semi) {
+		if slices.Contains(semi, ppns[1]) && slices.Contains(semi, ppns[2]) {
 			return mwsemi
 		}
 	}

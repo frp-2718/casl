@@ -1,14 +1,6 @@
 package bib
 
 // TODO: rewrite ALL UTILITY FUNCTIONS
-func in(s string, ens []string) bool {
-	for _, elem := range ens {
-		if s == elem {
-			return true
-		}
-	}
-	return false
-}
 
 func equalBibRecord(br1, br2 BibRecord) bool {
 	if br1.ppn != br2.ppn || br1.mms != br2.mms {

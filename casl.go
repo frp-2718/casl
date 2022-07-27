@@ -16,6 +16,8 @@ import (
 	"casl/alma"
 	"casl/bib"
 	"casl/requests"
+
+	"golang.org/x/exp/slices"
 )
 
 // General configuration.
@@ -161,19 +163,10 @@ func csvToMap(filename string) (map[string]string, map[string]string, map[string
 	return almaRCR, rcrILN, almaSTR
 }
 
-func in(e string, coll []string) bool {
-	for _, s := range coll {
-		if e == s {
-			return true
-		}
-	}
-	return false
-}
-
 func filter(s, ignored []string) []string {
 	var result []string
 	for _, elem := range s {
-		if !in(elem, ignored) {
+		if !slices.Contains(ignored, elem) {
 			result = append(result, elem)
 		}
 	}

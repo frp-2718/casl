@@ -3,6 +3,8 @@ package bib
 import (
 	"encoding/xml"
 	"log"
+
+	"golang.org/x/exp/slices"
 )
 
 // structs for Alma XML 'bibs' response
@@ -99,7 +101,7 @@ func decodeLocations(xmldata []byte, rcrs []string) ([]BibRecord, error) {
 		locations := []sudocLocation{}
 		for _, item := range query.Items {
 			for _, library := range item.Libraries {
-				if in(library.RCR, rcrs) {
+				if slices.Contains(rcrs, library.RCR) {
 					locations = append(locations, sudocLocation{rcr: library.RCR, name: library.Name})
 				}
 			}
