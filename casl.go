@@ -11,7 +11,6 @@ import (
 	"os"
 	"regexp"
 	"sort"
-	"strconv"
 	"time"
 
 	"casl/alma"
@@ -124,7 +123,10 @@ func writeCSV(results []bib.CRecord) {
 		records = append(records, record)
 	}
 
-	filename := "resultats_" + strconv.FormatInt(time.Now().Unix(), 10) + ".csv"
+	t := time.Now()
+	format := fmt.Sprintf("%d%02d%02d-%02d%02d%02d", t.Year(), t.Month(), t.Day(),
+		t.Hour(), t.Minute(), t.Second())
+	filename := "resultats_" + format + ".csv"
 	f, err := os.Create(filename)
 	defer f.Close()
 
