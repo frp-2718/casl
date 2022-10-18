@@ -14,7 +14,7 @@ import (
 )
 
 const MAX_CONCURRENT_REQUESTS = 50
-const MAX_REQUESTS_PER_SECOND = 25
+const MAX_REQUESTS_PER_SECOND = 10
 
 type AlmaClient interface {
 	GetHoldingsFromPPN(ppn alma.PPN) ([]alma.Holding, error)
@@ -40,7 +40,27 @@ func GetSudocLocations(ppns map[string]bool, rcrs []string, client requests.Fetc
 // GetAlmaLocations fetches locations and returns populated BibRecords
 // corresponding to the given SUDOC records.
 func GetAlmaLocations(a AlmaClient, bibs []BibRecord, rcrMap map[string]string) []BibRecord {
-	tokens := maxRequestsPerSecondLimiter(MAX_REQUESTS_PER_SECOND)
+	// limit concurrency
+	semaphore := make(chan struct{}, MAX_REQUESTS_PER_SECOND)
+
+	// max rate
+	rate := make(chan struct{}, MAX_REQUESTS_PER_SECOND)
+	for i := 0; i < cap(rate); i++ {
+		rate <- struct{}{}
+	}
+
+	// leaky bucket
+	go func() {
+		ticker := time.NewTicker(25 * time.Millisecond)
+		defer ticker.Stop()
+		for range ticker.C {
+			_, ok := <-rate
+			if !ok {
+				return
+			}
+		}
+	}()
+
 	wg := sync.WaitGroup{}
 	var mu = &sync.Mutex{}
 	var result []BibRecord
@@ -48,12 +68,17 @@ func GetAlmaLocations(a AlmaClient, bibs []BibRecord, rcrMap map[string]string) 
 	for _, record := range bibs {
 		wg.Add(1)
 		go func(record BibRecord) {
-			tokens <- true
 			defer wg.Done()
+			// wait for the rate limiter
+			rate <- struct{}{}
+			// check the concurrency semaphore
+			semaphore <- struct{}{}
+			defer func() {
+				<-semaphore
+			}()
 			locations, err := a.GetHoldingsFromPPN(alma.PPN(record.ppn))
 			if err != nil {
 				// TODO: handle fetch errors
-				<-tokens
 				return // ignore errors
 			}
 			record.almaLocations = convertLocations(locations)
@@ -71,11 +96,11 @@ func GetAlmaLocations(a AlmaClient, bibs []BibRecord, rcrMap map[string]string) 
 			mu.Lock()
 			result = append(result, record)
 			mu.Unlock()
-			<-tokens
 			fmt.Println("request")
 		}(record)
 	}
 	wg.Wait()
+	close(rate)
 	return result
 }
 
@@ -229,17 +254,4 @@ func mapKeys[K comparable, V any](m map[K]V) []K {
 		r = append(r, k)
 	}
 	return r
-}
-
-func maxRequestsPerSecondLimiter(requestsPerSecond uint) chan bool {
-	maxRequests := make(chan bool, requestsPerSecond)
-	for i := uint(0); i < requestsPerSecond; i++ {
-		go func() {
-			for {
-				<-time.After(time.Second)
-				<-maxRequests
-			}
-		}()
-	}
-	return maxRequests
 }
