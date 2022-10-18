@@ -5,13 +5,16 @@ import (
 	"casl/alma"
 	"casl/marc"
 	"casl/requests"
+	"fmt"
 	"strings"
 	"sync"
+	"time"
 
 	"golang.org/x/exp/slices"
 )
 
 const MAX_CONCURRENT_REQUESTS = 50
+const MAX_REQUESTS_PER_SECOND = 25
 
 type AlmaClient interface {
 	GetHoldingsFromPPN(ppn alma.PPN) ([]alma.Holding, error)
@@ -37,7 +40,7 @@ func GetSudocLocations(ppns map[string]bool, rcrs []string, client requests.Fetc
 // GetAlmaLocations fetches locations and returns populated BibRecords
 // corresponding to the given SUDOC records.
 func GetAlmaLocations(a AlmaClient, bibs []BibRecord, rcrMap map[string]string) []BibRecord {
-	var tokens = make(chan struct{}, MAX_CONCURRENT_REQUESTS)
+	tokens := maxRequestsPerSecondLimiter(MAX_REQUESTS_PER_SECOND)
 	wg := sync.WaitGroup{}
 	var mu = &sync.Mutex{}
 	var result []BibRecord
@@ -45,7 +48,7 @@ func GetAlmaLocations(a AlmaClient, bibs []BibRecord, rcrMap map[string]string) 
 	for _, record := range bibs {
 		wg.Add(1)
 		go func(record BibRecord) {
-			tokens <- struct{}{}
+			tokens <- true
 			defer wg.Done()
 			locations, err := a.GetHoldingsFromPPN(alma.PPN(record.ppn))
 			if err != nil {
@@ -69,6 +72,7 @@ func GetAlmaLocations(a AlmaClient, bibs []BibRecord, rcrMap map[string]string) 
 			result = append(result, record)
 			mu.Unlock()
 			<-tokens
+			fmt.Println("request")
 		}(record)
 	}
 	wg.Wait()
@@ -225,4 +229,17 @@ func mapKeys[K comparable, V any](m map[K]V) []K {
 		r = append(r, k)
 	}
 	return r
+}
+
+func maxRequestsPerSecondLimiter(requestsPerSecond uint) chan bool {
+	maxRequests := make(chan bool, requestsPerSecond)
+	for i := uint(0); i < requestsPerSecond; i++ {
+		go func() {
+			for {
+				<-time.After(time.Second)
+				<-maxRequests
+			}
+		}()
+	}
+	return maxRequests
 }
