@@ -5,7 +5,6 @@ import (
 	"casl/alma"
 	"casl/marc"
 	"casl/requests"
-	"fmt"
 	"strings"
 	"sync"
 	"time"
@@ -96,7 +95,6 @@ func GetAlmaLocations(a AlmaClient, bibs []BibRecord, rcrMap map[string]string) 
 			mu.Lock()
 			result = append(result, record)
 			mu.Unlock()
-			fmt.Println("request")
 		}(record)
 	}
 	wg.Wait()

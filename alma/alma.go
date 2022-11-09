@@ -62,7 +62,7 @@ func (a *Alma) SetFetcher(f Fetcher) {
 func (a *Alma) GetMMSfromPPN(ppn PPN) ([]MMS, error) {
 	data, err := a.Fetch(a.buildURL(bibs_t, string(ppn)))
 	if err != nil { // HTTP errors, including NotFoundError
-		log.Printf("alma: GetMMSfromPPN: %v", err)
+		// log.Printf("alma: GetMMSfromPPN: %v", err)
 		return nil, err
 	}
 	bibs, err := decodeBibsXML(data)
@@ -84,7 +84,7 @@ func (a *Alma) GetMMSfromPPN(ppn PPN) ([]MMS, error) {
 func (a *Alma) GetHoldings(mms MMS) ([]Holding, error) {
 	data, err := a.Fetch(a.buildURL(holdings_t, string(mms)))
 	if err != nil {
-		log.Printf("alma: GetHoldings: %v", err)
+		// log.Printf("alma: GetHoldings: %v", err)
 		return nil, err
 	}
 	holdings, err := decodeHoldingsXML(data)
@@ -100,7 +100,7 @@ func (a *Alma) GetHoldings(mms MMS) ([]Holding, error) {
 func (a *Alma) GetHoldingsFromPPN(ppn PPN) ([]Holding, error) {
 	ids, err := a.GetMMSfromPPN(ppn)
 	if err != nil {
-		log.Printf("alma: GetHoldingsFromPPN: %v", err)
+		// log.Printf("alma: GetHoldingsFromPPN: %v", err)
 		return nil, err
 	}
 	var result []Holding
@@ -148,8 +148,6 @@ func (f *almaFetcher) Fetch(url string) ([]byte, error) {
 	}
 	if resp.StatusCode != http.StatusOK {
 		err := decodeError(data, resp.StatusCode)
-		// TODO: optimize number of concurrent requests to minimize the number
-		// of 429
 		if resp.StatusCode == 429 && err.Error() == "PER_SECOND_THRESHOLD" {
 			log.Printf("alma>fetch: HTTP 429 PER_SECOND_THRESHOLD: %s", url)
 			time.Sleep(1 * time.Second)
