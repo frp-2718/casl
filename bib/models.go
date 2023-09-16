@@ -9,14 +9,14 @@ type BibRecord struct {
 
 type sudocLocation struct {
 	iln  string
-	rcr  string
+	rcr  []string
 	name string
 }
 
 type almaLocation struct {
 	collection string
 	ownerCode  string
-	rcr        string
+	rcr        []string
 }
 
 // CRecord is the fusion of a SUDOC record and an Alma record.
@@ -26,7 +26,7 @@ type CRecord struct {
 	SUDOCLibrary     string
 	SUDOCSublocation string
 	ILN              string
-	RCR              string
+	RCR              []string
 	InAlma           bool
 	InSUDOC          bool
 }

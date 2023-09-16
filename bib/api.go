@@ -12,8 +12,8 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-const MAX_CONCURRENT_REQUESTS = 50
-const MAX_REQUESTS_PER_SECOND = 10
+const MAX_CONCURRENT_REQUESTS = 40
+const MAX_REQUESTS_PER_SECOND = 5
 
 type AlmaClient interface {
 	GetHoldingsFromPPN(ppn alma.PPN) ([]alma.Holding, error)
@@ -38,7 +38,7 @@ func GetSudocLocations(ppns map[string]bool, rcrs []string, client requests.Fetc
 
 // GetAlmaLocations fetches locations and returns populated BibRecords
 // corresponding to the given SUDOC records.
-func GetAlmaLocations(a AlmaClient, bibs []BibRecord, rcrMap map[string]string) []BibRecord {
+func GetAlmaLocations(a AlmaClient, bibs []BibRecord, rcrMap map[string][]string) []BibRecord {
 	// limit concurrency
 	semaphore := make(chan struct{}, MAX_REQUESTS_PER_SECOND)
 
@@ -164,7 +164,7 @@ func Filter(records []CRecord, monoRCRs []string, client requests.Fetcher) []CRe
 			// Exclusion of electronic resources
 			if !strings.HasPrefix(class, "O") {
 				// Add sublocations for some monolithic RCRs
-				if r.SUDOCLibrary != "" && slices.Contains(monoRCRs, r.RCR) {
+				if r.SUDOCLibrary != "" && slices.Contains(monoRCRs, r.RCR[0]) {
 					addSublocation(&r, marcrecord)
 				}
 				mu.Lock()

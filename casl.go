@@ -24,7 +24,7 @@ import (
 var conf *config
 
 // Mappings Alma/RCR, Alma/Libraries names, RCR/ILN, read from CSV.
-var alma2rcr map[string]string
+var alma2rcr map[string][]string
 var rcr2iln map[string]string
 var alma2string map[string]string
 
@@ -34,8 +34,8 @@ var monolithicRCR []string
 
 var httpFetcher requests.HttpFetch
 
-func init() {
-	conf = loadConfig()
+func initialize() {
+	conf = LoadConfig()
 	alma2rcr, rcr2iln, alma2string = csvToMap(conf.MappingFilePath)
 	httpFetcher := requests.HttpFetch{}
 	followed, err := bib.GetRCRs(conf.ILNs, &httpFetcher)
@@ -47,6 +47,8 @@ func init() {
 }
 
 func main() {
+	initialize()
+
 	if len(os.Args) < 2 {
 		fmt.Println("Usage: casl file1 file2...")
 		log.Fatal("casl: called without arguments")
@@ -142,8 +144,8 @@ func writeCSV(results []bib.CRecord) {
 	}
 }
 
-func csvToMap(filename string) (map[string]string, map[string]string, map[string]string) {
-	almaRCR := make(map[string]string)
+func csvToMap(filename string) (map[string][]string, map[string]string, map[string]string) {
+	almaRCR := make(map[string][]string)
 	rcrILN := make(map[string]string)
 	almaSTR := make(map[string]string)
 	f, err := os.Open(filename)
@@ -161,7 +163,7 @@ func csvToMap(filename string) (map[string]string, map[string]string, map[string
 		if err != nil {
 			log.Fatal(err)
 		}
-		almaRCR[record[1]] = record[2]
+		almaRCR[record[1]] = append(almaRCR[record[1]], record[2])
 		if len(record[2]) > 0 {
 			rcrILN[record[2]] = record[3]
 		}
