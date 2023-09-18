@@ -102,7 +102,7 @@ func decodeLocations(xmldata []byte, rcrs []string) ([]BibRecord, error) {
 		for _, item := range query.Items {
 			for _, library := range item.Libraries {
 				if slices.Contains(rcrs, library.RCR) {
-					locations = append(locations, sudocLocation{rcr: library.RCR, name: library.Name})
+					locations = append(locations, sudocLocation{rcr: []string{library.RCR}, name: library.Name})
 				}
 			}
 		}

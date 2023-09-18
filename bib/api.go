@@ -183,7 +183,7 @@ func addSublocation(r *CRecord, m *marc.Record) {
 	sep := ""
 	var sublocations []string
 	for _, f := range fields {
-		if extractRCR(f.GetValue("5")[0]) == r.RCR {
+		if extractRCR(f.GetValue("5")[0]) == r.RCR[0] {
 			if r.SUDOCSublocation != "" {
 				sep = ", "
 			}
@@ -211,7 +211,7 @@ func convertLocations(s1 []alma.Holding) []almaLocation {
 
 func almaInSudoc(al almaLocation, sl []sudocLocation) bool {
 	for _, l := range sl {
-		if l.rcr == al.rcr {
+		if l.rcr[0] == al.rcr[0] {
 			return true
 		}
 	}
@@ -220,7 +220,7 @@ func almaInSudoc(al almaLocation, sl []sudocLocation) bool {
 
 func sudocInAlma(sl sudocLocation, al []almaLocation) bool {
 	for _, l := range al {
-		if l.rcr == sl.rcr {
+		if l.rcr[0] == sl.rcr[0] {
 			return true
 		}
 	}

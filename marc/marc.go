@@ -88,7 +88,7 @@ func (r *Record) GetField(tag string) []Field {
 	return res
 }
 
-// Value returns a slice of the subfields of given code.
+// GetValue returns a slice of the subfields of given code.
 func (cf *Controlfield) GetValue(code string) []string {
 	return []string{cf.Value}
 }

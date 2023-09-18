@@ -6,7 +6,6 @@ import (
 	"bufio"
 	"encoding/csv"
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"regexp"
@@ -15,44 +14,17 @@ import (
 
 	"casl/alma"
 	"casl/bib"
-	"casl/requests"
 
 	"golang.org/x/exp/slices"
 )
 
-// General configuration.
-var conf *config
-
-// Mappings Alma/RCR, Alma/Libraries names, RCR/ILN, read from CSV.
-var alma2rcr map[string][]string
-var rcr2iln map[string]string
-var alma2string map[string]string
-
-// Filters.
-var followedRCR []string
-var monolithicRCR []string
-
-var httpFetcher requests.HttpFetch
-
-func initialize() {
-	conf = LoadConfig()
-	alma2rcr, rcr2iln, alma2string = csvToMap(conf.MappingFilePath)
-	httpFetcher := requests.HttpFetch{}
-	followed, err := bib.GetRCRs(conf.ILNs, &httpFetcher)
-	if err != nil {
-		log.Fatalf("casl: unable to fetch RCRs: %s", err)
-	}
-	followedRCR = filter(followed, conf.IgnoredSudocRCR)
-	monolithicRCR = conf.MonolithicRCR
-}
-
 func main() {
-	initialize()
-
 	if len(os.Args) < 2 {
 		fmt.Println("Usage: casl file1 file2...")
 		log.Fatal("casl: called without arguments")
 	}
+
+	casl := NewCasl()
 
 	start := time.Now()
 
@@ -84,17 +56,18 @@ func main() {
 
 	// TODO: concurrent pipeline
 	// SUDOC processing
-	records := bib.GetSudocLocations(ppns, followedRCR, &httpFetcher)
+	records := bib.GetSudocLocations(ppns, casl.config.FollowedRCR, casl.httpClient)
 
 	// Alma processing
-	almaClient, err := alma.New(nil, conf.AlmaAPIKey, "")
+	almaClient, err := alma.New(nil, casl.config.AlmaAPIKey, "")
 	if err != nil {
 		log.Fatalf("GetAlmaLocations: unable to initialize the Alma client: %v", err)
 	}
-	resultats := bib.GetAlmaLocations(almaClient, records, alma2rcr)
+	resultats := bib.GetAlmaLocations(almaClient, records, casl.mappings.alma2rcr)
 
 	// End results comparison
-	anomalies := bib.Filter(bib.ComparePPN(resultats, conf.IgnoredAlmaColl), monolithicRCR, &httpFetcher)
+	anomalies := bib.Filter(bib.ComparePPN(resultats, casl.config.IgnoredAlmaColl),
+		casl.config.MonolithicRCR, casl.httpClient)
 
 	writeCSV(anomalies)
 
@@ -110,20 +83,18 @@ func writeCSV(results []bib.CRecord) {
 		if results[i].ILN != results[j].ILN {
 			return results[i].ILN < results[j].ILN
 		}
-		if results[i].RCR != results[j].ILN {
-			return results[i].RCR < results[j].RCR
-		}
+		// if results[i].RCR != results[j].ILN {
+		// 	return results[i].RCR < results[j].RCR
+		// }
 		return results[i].PPN < results[j].PPN
 	})
-	for _, res := range results {
-		var suffix string
-		if res.SUDOCSublocation != "" {
-			suffix = " - " + res.SUDOCSublocation
-		}
-		record := []string{res.PPN, rcr2iln[res.RCR], alma2string[res.AlmaLibrary],
-			res.SUDOCLibrary + suffix, res.RCR}
-		records = append(records, record)
-	}
+	// for _, res := range results {
+	// 	// 	suffix = " - " + res.SUDOCSublocation
+	// 	// }
+	// 	// record := []string{res.PPN, rcr2iln[res.RCR], alma2string[res.AlmaLibrary],
+	// 	// 	res.SUDOCLibrary + suffix, res.RCR}
+	// 	// records = append(records, record)
+	// }
 
 	t := time.Now()
 	format := fmt.Sprintf("%d%02d%02d-%02d%02d%02d", t.Year(), t.Month(), t.Day(),
@@ -142,34 +113,6 @@ func writeCSV(results []bib.CRecord) {
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-
-func csvToMap(filename string) (map[string][]string, map[string]string, map[string]string) {
-	almaRCR := make(map[string][]string)
-	rcrILN := make(map[string]string)
-	almaSTR := make(map[string]string)
-	f, err := os.Open(filename)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer f.Close()
-
-	r := csv.NewReader(f)
-	for {
-		record, err := r.Read()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			log.Fatal(err)
-		}
-		almaRCR[record[1]] = append(almaRCR[record[1]], record[2])
-		if len(record[2]) > 0 {
-			rcrILN[record[2]] = record[3]
-		}
-		almaSTR[record[1]] = record[0]
-	}
-	return almaRCR, rcrILN, almaSTR
 }
 
 func filter(s, ignored []string) []string {
