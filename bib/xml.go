@@ -97,7 +97,7 @@ func decodeLocations(xmldata []byte, rcrs []string) ([]BibRecord, error) {
 		return nil, err
 	}
 	for _, query := range result.Requests {
-		record := BibRecord{ppn: query.PPN}
+		record := BibRecord{PPN: query.PPN}
 		locations := []sudocLocation{}
 		for _, item := range query.Items {
 			for _, library := range item.Libraries {

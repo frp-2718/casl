@@ -1,7 +1,7 @@
 package bib
 
 type BibRecord struct {
-	ppn            string
+	PPN            string
 	mms            string
 	sudocLocations []sudocLocation
 	almaLocations  []almaLocation

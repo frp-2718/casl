@@ -75,7 +75,7 @@ func GetAlmaLocations(a AlmaClient, bibs []BibRecord, rcrMap map[string][]string
 			defer func() {
 				<-semaphore
 			}()
-			locations, err := a.GetHoldingsFromPPN(alma.PPN(record.ppn))
+			locations, err := a.GetHoldingsFromPPN(alma.PPN(record.PPN))
 			if err != nil {
 				// TODO: handle fetch errors
 				return // ignore errors
@@ -114,28 +114,28 @@ func GetRCRs(ilns []string, client requests.Fetcher) ([]string, error) {
 
 // ComparePPN builds a list of results from SUDOC and Alma records which don't
 // match.
-func ComparePPN(records []BibRecord, ignoredCollections []string) []CRecord {
-	var results []CRecord
-	var result CRecord
-	clean := removeIgnored(records, ignoredCollections)
-	for _, record := range clean {
-		for _, al := range record.almaLocations {
-			if !almaInSudoc(al, record.sudocLocations) {
-				result = CRecord{PPN: record.ppn, AlmaLibrary: al.ownerCode,
-					RCR: al.rcr, InSUDOC: false, InAlma: true}
-				results = append(results, result)
-			}
-		}
-		for _, sl := range record.sudocLocations {
-			if !sudocInAlma(sl, record.almaLocations) {
-				result = CRecord{PPN: record.ppn, RCR: sl.rcr, SUDOCLibrary: sl.name,
-					InSUDOC: true, InAlma: false}
-				results = append(results, result)
-			}
-		}
-	}
-	return results
-}
+// func ComparePPN(records []BibRecord, ignoredCollections []string) []CRecord {
+// 	var results []CRecord
+// 	var result CRecord
+// 	clean := removeIgnored(records, ignoredCollections)
+// 	for _, record := range clean {
+// 		for _, al := range record.almaLocations {
+// 			if !almaInSudoc(al, record.sudocLocations) {
+// 				result = CRecord.ppn: record.PPN, AlmaLibrary: al.ownerCode,
+// 					RCR: al.rcr, InSUDOC: false, InAlma: true}
+// 				results = append(results, result)
+// 			}
+// 		}
+// 		for _, sl := range record.sudocLocations {
+// 			if !sudocInAlma(sl, record.almaLocations) {
+// 				result = Crecord.PPN: record.PPN, RCR: sl.rcr, SUDOCLibrary: sl.name,
+// 					InSUDOC: true, InAlma: false}
+// 				results = append(results, result)
+// 			}
+// 		}
+// 	}
+// 	return results
+// }
 
 func Filter(records []CRecord, monoRCRs []string, client requests.Fetcher) []CRecord {
 	var tokens = make(chan struct{}, MAX_CONCURRENT_REQUESTS)
