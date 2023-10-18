@@ -3,9 +3,6 @@ package bib
 import (
 	"casl/marc"
 	"errors"
-	"reflect"
-	"sort"
-	"strconv"
 	"testing"
 	"time"
 
@@ -65,14 +62,14 @@ func (f *mockHttpFetch) FetchRCR(ilns []string) []byte {
 	return fakeIln2rcr
 }
 
-func (f *mockHttpFetch) FetchMarc(ppn string) []byte {
-	if ppn == "ppn_ok1" || ppn == "ppn_ok2" {
-		return marcAax
-	} else if ppn == "ppn_err" {
-		return marcError
-	}
-	return marcOax
-}
+// func (f *mockHttpFetch) FetchMarc(ppn string) []byte {
+// 	if ppn == "ppn_ok1" || ppn == "ppn_ok2" {
+// 		return marcAax
+// 	} else if ppn == "ppn_err" {
+// 		return marcError
+// 	}
+// 	return marcOax
+// }
 
 // Tests
 func TestGetSudocLocations(t *testing.T) {
@@ -334,86 +331,86 @@ func TestAddSublocation(t *testing.T) {
 }
 
 // benchmarks
-type mockHttpClient struct{}
+// type mockHttpClient struct{}
 
-func (f *mockHttpClient) FetchAll(ppns []string) [][]byte {
-	return [][]byte{}
-}
-func (f *mockHttpClient) FetchPPN(ppn string, secretParam string) []byte {
-	return []byte{}
-}
+// func (f *mockHttpClient) FetchAll(ppns []string) [][]byte {
+// 	return [][]byte{}
+// }
+// func (f *mockHttpClient) FetchPPN(ppn string, secretParam string) []byte {
+// 	return []byte{}
+// }
 
-func (f *mockHttpClient) FetchRCR(ilns []string) []byte {
-	return []byte{}
-}
+// func (f *mockHttpClient) FetchRCR(ilns []string) []byte {
+// 	return []byte{}
+// }
 
-func (f *mockHttpClient) FetchMarc(ppn string) []byte {
-	time.Sleep(10 * time.Millisecond)
-	return []byte{}
-}
+// func (f *mockHttpClient) FetchMarc(ppn string) []byte {
+// 	time.Sleep(10 * time.Millisecond)
+// 	return []byte{}
+// }
 
-func BenchmarkFilter(b *testing.B) {
-	client := mockHttpClient{}
-	var crecords []CRecord
-	for i := 0; i < 250; i++ {
-		id := "ppn" + strconv.Itoa(i)
-		crecords = append(crecords, CRecord{PPN: id})
-	}
-	for i := 0; i < b.N; i++ {
-		Filter(crecords, []string{}, &client)
-	}
-}
+// func BenchmarkFilter(b *testing.B) {
+// 	client := mockHttpClient{}
+// 	var crecords []CRecord
+// 	for i := 0; i < 250; i++ {
+// 		id := "ppn" + strconv.Itoa(i)
+// 		crecords = append(crecords, CRecord{PPN: id})
+// 	}
+// 	for i := 0; i < b.N; i++ {
+// 		Filter(crecords, []string{}, &client)
+// 	}
+// }
 
-func BenchmarkGetAlmaLocations(b *testing.B) {
-	client := mockAlmaClient{}
-	rcrs := make(map[string]string)
-	rcrs["BIB1"] = "RCR1"
-	rcrs["BIB2"] = "RCR2"
-	var brecords []BibRecord
-	for i := 0; i < 250; i++ {
-		brecords = append(brecords, BibRecord{ppn: "twoloc"})
-	}
-	for i := 0; i < b.N; i++ {
-		GetAlmaLocations(client, brecords, rcrs)
-	}
-}
+// func BenchmarkGetAlmaLocations(b *testing.B) {
+// 	client := mockAlmaClient{}
+// 	rcrs := make(map[string]string)
+// 	rcrs["BIB1"] = "RCR1"
+// 	rcrs["BIB2"] = "RCR2"
+// 	var brecords []BibRecord
+// 	for i := 0; i < 250; i++ {
+// 		brecords = append(brecords, BibRecord{ppn: "twoloc"})
+// 	}
+// 	for i := 0; i < b.N; i++ {
+// 		GetAlmaLocations(client, brecords, rcrs)
+// 	}
+// }
 
-// helpers
-func makeBibRecords() map[string]BibRecord {
-	result := make(map[string]BibRecord)
+// // helpers
+// func makeBibRecords() map[string]BibRecord {
+// 	result := make(map[string]BibRecord)
 
-	// BibRecord examples
-	sl1 := sudocLocation{rcr: "rcr000001", name: "TEST1"}
-	sl2 := sudocLocation{rcr: "rcr000002", name: "TEST2"}
-	sl3 := sudocLocation{rcr: "rcr000003", name: "TEST3"}
+// 	// BibRecord examples
+// 	sl1 := sudocLocation{rcr: "rcr000001", name: "TEST1"}
+// 	sl2 := sudocLocation{rcr: "rcr000002", name: "TEST2"}
+// 	sl3 := sudocLocation{rcr: "rcr000003", name: "TEST3"}
 
-	result["br_empty1"] = BibRecord{ppn: "ppn000001"}
-	result["br_empty2"] = BibRecord{ppn: "ppn000002"}
-	result["br_empty3"] = BibRecord{ppn: "ppn000003"}
-	result["br1"] = BibRecord{ppn: "ppn000001", sudocLocations: []sudocLocation{sl1, sl3}}
-	result["br2"] = BibRecord{ppn: "ppn000001", sudocLocations: []sudocLocation{sl1, sl2, sl3}}
-	result["br3"] = BibRecord{ppn: "ppn000002", sudocLocations: []sudocLocation{sl1}}
-	result["br4"] = BibRecord{ppn: "ppn000003", sudocLocations: []sudocLocation{sl1}}
+// 	result["br_empty1"] = BibRecord{ppn: "ppn000001"}
+// 	result["br_empty2"] = BibRecord{ppn: "ppn000002"}
+// 	result["br_empty3"] = BibRecord{ppn: "ppn000003"}
+// 	result["br1"] = BibRecord{ppn: "ppn000001", sudocLocations: []sudocLocation{sl1, sl3}}
+// 	result["br2"] = BibRecord{ppn: "ppn000001", sudocLocations: []sudocLocation{sl1, sl2, sl3}}
+// 	result["br3"] = BibRecord{ppn: "ppn000002", sudocLocations: []sudocLocation{sl1}}
+// 	result["br4"] = BibRecord{ppn: "ppn000003", sudocLocations: []sudocLocation{sl1}}
 
-	return result
-}
+// 	return result
+// }
 
-func equalBibRecords(b1, b2 []BibRecord) bool {
-	sort.Slice(b1, func(i, j int) bool {
-		return b1[i].ppn < b1[j].ppn
-	})
-	sort.Slice(b2, func(i, j int) bool {
-		return b2[i].ppn < b2[j].ppn
-	})
-	return reflect.DeepEqual(b1, b2)
-}
+// func equalBibRecords(b1, b2 []BibRecord) bool {
+// 	sort.Slice(b1, func(i, j int) bool {
+// 		return b1[i].ppn < b1[j].ppn
+// 	})
+// 	sort.Slice(b2, func(i, j int) bool {
+// 		return b2[i].ppn < b2[j].ppn
+// 	})
+// 	return reflect.DeepEqual(b1, b2)
+// }
 
-func equalCRecords(c1, c2 []CRecord) bool {
-	sort.Slice(c1, func(i, j int) bool {
-		return c1[i].PPN < c1[j].PPN
-	})
-	sort.Slice(c2, func(i, j int) bool {
-		return c2[i].PPN < c2[j].PPN
-	})
-	return reflect.DeepEqual(c1, c2)
-}
+// func equalCRecords(c1, c2 []CRecord) bool {
+// 	sort.Slice(c1, func(i, j int) bool {
+// 		return c1[i].PPN < c1[j].PPN
+// 	})
+// 	sort.Slice(c2, func(i, j int) bool {
+// 		return c2[i].PPN < c2[j].PPN
+// 	})
+// 	return reflect.DeepEqual(c1, c2)
+// }

@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"casl/bib"
+	"casl/casl"
 )
 
 func main() {
@@ -20,7 +21,8 @@ func main() {
 		log.Fatal("casl: called without arguments")
 	}
 
-	casl := NewCasl()
+	w := casl.NewCasl()
+	fmt.Println(w.Mappings)
 
 	start := time.Now()
 
@@ -53,7 +55,17 @@ func main() {
 	}
 	fmt.Printf("%d PPN à vérifier...\n", len(ppns))
 
-	fmt.Println(casl.config.FollowedRCR)
+	// fmt.Println(casl.mappings.rcr2iln)
+	// bib.GetSudoc(&records[0], casl.mappings.rcr2iln)
+	// fmt.Println(records[0])
+
+	// for _, ppn := range records {
+	// 	bib.GetSudoc(&ppn)
+	// }
+
+	// for _, record := range records {
+	// 	fmt.Println(record)
+	// }
 
 	// 	// TODO: concurrent pipeline
 	// 	// SUDOC processing

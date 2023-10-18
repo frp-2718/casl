@@ -102,32 +102,14 @@ func decodeLocations(xmldata []byte, rcrs []string) ([]BibRecord, error) {
 		for _, item := range query.Items {
 			for _, library := range item.Libraries {
 				if slices.Contains(rcrs, library.RCR) {
-					locations = append(locations, sudocLocation{rcr: []string{library.RCR}, name: library.Name})
+					locations = append(locations, sudocLocation{rcr: library.RCR, name: library.Name})
 				}
 			}
 		}
-		if len(locations) > 0 {
-			record.sudocLocations = locations
-		}
+		// if len(locations) > 0 {
+		// 	record.SudocLocations = locations
+		// }
 		records = append(records, record)
 	}
 	return records, nil
-}
-
-func decodeRCR(xmldata []byte) ([]string, error) {
-	var result sudoc
-	var rcrs []string
-	err := xml.Unmarshal(xmldata, &result)
-	if err != nil {
-		log.Printf("decodeRCR: %s", err)
-		return nil, err
-	}
-	for _, query := range result.Queries {
-		for _, r := range query.Results {
-			for _, l := range r.Libraries {
-				rcrs = append(rcrs, l.RCR)
-			}
-		}
-	}
-	return rcrs, nil
 }

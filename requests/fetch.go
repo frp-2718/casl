@@ -2,9 +2,11 @@
 package requests
 
 import (
-	"io/ioutil"
+	"errors"
+	"io"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 )
@@ -24,7 +26,7 @@ type Fetcher interface {
 }
 
 type HttpFetch struct{}
-type HttpRequester func(string) []byte
+type HttpRequester func(string) ([]byte, error)
 
 // FetchAll returns all xml data corresponding to each ppn in a map, or
 // nil if unsuccessful.
@@ -36,35 +38,41 @@ func (f *HttpFetch) FetchAll(ppns []string) [][]byte {
 
 // FetchRCR returns a XML iln2rcr response from a list of ILNs.
 func (f *HttpFetch) FetchRCR(ilns []string) []byte {
-	return fetch(iln2rcr_url + strings.Join(ilns, ","))
+	data, _ := fetch(iln2rcr_url + strings.Join(ilns, ","))
+	return data
 }
 
 func (f *HttpFetch) FetchMarc(ppn string) []byte {
+	data, _ := fetch(marcxml_url + ppn + ".xml")
+	return data
+}
+
+func FetchMarc(ppn string) ([]byte, error) {
 	return fetch(marcxml_url + ppn + ".xml")
 }
 
 // Fetch returns the xml record corresponding to the given URL, or nil if
 // unsucessful
-func fetch(url string) []byte {
+func fetch(url string) ([]byte, error) {
 	resp, err := http.Get(url)
 	if err != nil {
 		// if request time out, just ignore
 		// TODO: delay and request again
 		// TODO: handle other url.errors
 		log.Println(err)
-		return []byte{}
+		return []byte{}, nil
 	}
 	if resp.StatusCode != http.StatusOK {
 		log.Printf("fetch: HTTP status code = %d", resp.StatusCode)
-		return []byte{}
+		return []byte{}, errors.New(strconv.Itoa(resp.StatusCode))
 	}
-	data, err := ioutil.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
 	resp.Body.Close()
 	if err != nil {
 		log.Println(err)
-		return []byte{}
+		return []byte{}, err
 	}
-	return data
+	return data, nil
 }
 
 func fetchBatch(ppns []string, max_params int, request HttpRequester) [][]byte {
@@ -78,7 +86,7 @@ func fetchBatch(ppns []string, max_params int, request HttpRequester) [][]byte {
 		go func(i int, u string) {
 			tokens <- struct{}{}
 			defer wg.Done()
-			xmlBatch[i] = request(u)
+			xmlBatch[i], _ = request(u)
 			<-tokens
 		}(index, url)
 	}

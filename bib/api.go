@@ -3,8 +3,10 @@ package bib
 
 import (
 	"casl/alma"
+	"casl/casl"
 	"casl/marc"
 	"casl/requests"
+	"errors"
 	"strings"
 	"sync"
 	"time"
@@ -17,6 +19,42 @@ const MAX_REQUESTS_PER_SECOND = 5
 
 type AlmaClient interface {
 	GetHoldingsFromPPN(ppn alma.PPN) ([]alma.Holding, error)
+}
+
+func GetSudoc(record *BibRecord, c casl.Casl) error {
+	data, err := requests.FetchMarc(record.PPN)
+	if err != nil {
+		return err
+	}
+	marcRecord, err := marc.NewRecord(data)
+	if err != nil {
+		return err
+	}
+
+	var locs []*sudocLocation
+	for _, field := range marcRecord.GetField("930") {
+		rcr := field.GetValue("5")
+		if len(rcr) != 1 {
+			return errors.New("MARC 930$5 does not contain a unique location")
+		}
+
+		sublocation := field.GetValue("c")
+		if len(sublocation) > 1 {
+			return errors.New("MARC 930$c does not contain a unique value")
+		}
+
+		var location sudocLocation
+		location.rcr = strings.Split(rcr[0], ":")[0]
+		location.iln = c.Mappings.RCR2iln[location.rcr]
+		if len(sublocation) == 1 {
+			location.sublocation = sublocation[0]
+		}
+
+		locs = append(locs, &location)
+	}
+	record.SudocLocations = locs
+
+	return nil
 }
 
 // GetSudocLocations fetches locations and returns populated BibRecords
@@ -100,16 +138,6 @@ func GetAlmaLocations(a AlmaClient, bibs []BibRecord, rcrMap map[string][]string
 	wg.Wait()
 	close(rate)
 	return result
-}
-
-// GetRCRs returns a slice of RCRs as strings from a slice of ILNs.
-func GetRCRs(ilns []string, client requests.Fetcher) ([]string, error) {
-	xmldata := client.FetchRCR(ilns)
-	result, err := decodeRCR(xmldata)
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
 }
 
 // ComparePPN builds a list of results from SUDOC and Alma records which don't
@@ -211,7 +239,7 @@ func convertLocations(s1 []alma.Holding) []almaLocation {
 
 func almaInSudoc(al almaLocation, sl []sudocLocation) bool {
 	for _, l := range sl {
-		if l.rcr[0] == al.rcr[0] {
+		if string(l.rcr[0]) == al.rcr[0] {
 			return true
 		}
 	}
@@ -220,7 +248,7 @@ func almaInSudoc(al almaLocation, sl []sudocLocation) bool {
 
 func sudocInAlma(sl sudocLocation, al []almaLocation) bool {
 	for _, l := range al {
-		if l.rcr[0] == sl.rcr[0] {
+		if l.rcr[0] == string(sl.rcr[0]) {
 			return true
 		}
 	}
