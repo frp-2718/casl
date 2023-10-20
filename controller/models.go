@@ -1,11 +1,14 @@
 package controller
 
 import (
+	"casl/entities"
 	"fmt"
 	"strings"
 )
 
 type suClient interface {
+	GetLocations(ppn string) ([]*entities.SudocLocation, error)
+	GetFilteredLocations(ppn string, rcrs []string) ([]*entities.SudocLocation, error)
 }
 
 type almaClient interface {
@@ -14,8 +17,8 @@ type almaClient interface {
 type Controller struct {
 	Config     *config
 	Mappings   *mappings
-	SUClient   *suClient
-	AlmaClient *almaClient
+	SUClient   suClient
+	AlmaClient almaClient
 }
 
 type config struct {
@@ -41,7 +44,7 @@ func (c Controller) String() string {
 	fmt.Fprintln(&sb, c.Config)
 	fmt.Fprintln(&sb, c.Mappings)
 	fmt.Fprintf(&sb, "*** CLIENTS\n\n")
-	fmt.Fprintf(&sb, "SUDOC client: %p\n", c.SUClient)
+	fmt.Fprintf(&sb, "SUDOC client: %s\n", c.SUClient)
 	fmt.Fprintf(&sb, "Alma client: %p\n", c.AlmaClient)
 	return sb.String()
 }

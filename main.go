@@ -3,11 +3,15 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"os"
+	"regexp"
+	"time"
 
 	"casl/controller"
+	"casl/entities"
 )
 
 func main() {
@@ -16,51 +20,54 @@ func main() {
 		log.Fatal("casl: called without arguments")
 	}
 
+	start := time.Now()
+
 	ctrl := controller.NewController("config.json")
-	fmt.Println(ctrl)
+
+	// PPNs to check.
+	ppns := make(map[string]bool)
+	var records []entities.BibRecord
+	var ppnPattern = regexp.MustCompile(`[0-9]{8}([0-9]|(x|X))`)
+
+	for _, filename := range os.Args[1:] {
+		f, err := os.Open(filename)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer f.Close()
+		scanner := bufio.NewScanner(f)
+
+		// Discard invalid ppns.
+		for scanner.Scan() {
+			if line := scanner.Text(); ppnPattern.Match([]byte(line)) {
+				ppns[line] = true
+				records = append(records, entities.BibRecord{PPN: line})
+			} else {
+				log.Printf("invalid PPN: %s", line)
+			}
+		}
+		if err := scanner.Err(); err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	fmt.Printf("%d PPN à vérifier...\n", len(ppns))
+
+	for _, record := range records {
+		locs, err := ctrl.SUClient.GetFilteredLocations(record.PPN, ctrl.Config.FollowedRCR)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		if len(locs) > 0 {
+			record.SudocLocations = locs
+			fmt.Println(record)
+		}
+	}
+
+	elapsed := time.Since(start)
+	fmt.Printf("Elapsed time: %s\n", elapsed)
 }
-
-// w := casl.NewCasl()
-// fmt.Println(w.Mappings)
-
-// start := time.Now()
-
-// // PPNs to check.
-// ppns := make(map[string]bool)
-
-// var records []bib.BibRecord
-
-// for _, filename := range os.Args[1:] {
-// 	f, err := os.Open(filename)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	defer f.Close()
-// 	scanner := bufio.NewScanner(f)
-
-// 	// Discard invalid ppns.
-// 	var ppnPattern = regexp.MustCompile(`[0-9]{8}([0-9]|(x|X))`)
-// 	for scanner.Scan() {
-// 		if line := scanner.Text(); ppnPattern.Match([]byte(line)) {
-// 			ppns[line] = true
-// 			records = append(records, bib.BibRecord{PPN: line})
-// 		} else {
-// 			log.Printf("invalid PPN: %s", line)
-// 		}
-// 	}
-// 	if err := scanner.Err(); err != nil {
-// 		log.Fatal(err)
-// 	}
-// }
-// fmt.Printf("%d PPN à vérifier...\n", len(ppns))
-
-// // fmt.Println(casl.mappings.rcr2iln)
-// // bib.GetSudoc(&records[0], casl.mappings.rcr2iln)
-// // fmt.Println(records[0])
-
-// // for _, ppn := range records {
-// // 	bib.GetSudoc(&ppn)
-// // }
 
 // // for _, record := range records {
 // // 	fmt.Println(record)
@@ -83,8 +90,6 @@ func main() {
 
 // // 	writeCSV(anomalies)
 
-// elapsed := time.Since(start)
-// fmt.Printf("Elapsed time: %s\n", elapsed)
 // // }
 
 // // func writeCSV(results []bib.CRecord) {

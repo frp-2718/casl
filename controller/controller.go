@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"casl/sudoc"
 	"encoding/csv"
 	"encoding/json"
 	"io"
@@ -15,6 +16,8 @@ func NewController(configFile string) Controller {
 	ctrl.loadConfig(configFile)
 	ctrl.getMappingsFromCSV(ctrl.Config.MappingFilePath)
 	ctrl.getRCRs()
+
+	ctrl.SUClient = sudoc.NewSudocClient()
 
 	return ctrl
 }
