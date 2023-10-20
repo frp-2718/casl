@@ -53,6 +53,7 @@ func main() {
 
 	fmt.Printf("%d PPN à vérifier...\n", len(ppns))
 
+	var results []entities.BibRecord
 	for _, record := range records {
 		locs, err := ctrl.SUClient.GetFilteredLocations(record.PPN, ctrl.Config.FollowedRCR)
 		if err != nil {
@@ -60,83 +61,12 @@ func main() {
 		}
 		if len(locs) > 0 {
 			record.SudocLocations = locs
-			fmt.Println(record)
+			results = append(results, record)
 		}
 	}
+
+	entities.WriteCSV(results)
 
 	elapsed := time.Since(start)
 	fmt.Printf("Elapsed time: %s\n", elapsed)
 }
-
-// // for _, record := range records {
-// // 	fmt.Println(record)
-// // }
-
-// // 	// TODO: concurrent pipeline
-// // 	// SUDOC processing
-// // 	records = bib.GetSudocLocations(ppns, casl.config.FollowedRCR, casl.httpClient)
-
-// // 	// Alma processing
-// // 	almaClient, err := alma.New(nil, casl.config.AlmaAPIKey, "")
-// // 	if err != nil {
-// // 		log.Fatalf("GetAlmaLocations: unable to initialize the Alma client: %v", err)
-// // 	}
-// // 	resultats := bib.GetAlmaLocations(almaClient, records, casl.mappings.alma2rcr)
-
-// // 	// End results comparison
-// // 	anomalies := bib.Filter(bib.ComparePPN(resultats, casl.config.IgnoredAlmaColl),
-// // 		casl.config.MonolithicRCR, casl.httpClient)
-
-// // 	writeCSV(anomalies)
-
-// // }
-
-// // func writeCSV(results []bib.CRecord) {
-// // 	var records [][]string
-// // 	records = append(records, []string{"PPN", "ILN", "Bibliothèque Alma",
-// // 		"Bibliothèque SUDOC", "RCR"})
-// // 	sort.Slice(results, func(i, j int) bool {
-// // 		if results[i].ILN != results[j].ILN {
-// // 			return results[i].ILN < results[j].ILN
-// // 		}
-// // 		// if results[i].RCR != results[j].ILN {
-// // 		// 	return results[i].RCR < results[j].RCR
-// // 		// }
-// // 		return results[i].PPN < results[j].PPN
-// // 	})
-// // 	// for _, res := range results {
-// // 	// 	// 	suffix = " - " + res.SUDOCSublocation
-// // 	// 	// }
-// // 	// 	// record := []string{res.PPN, rcr2iln[res.RCR], alma2string[res.AlmaLibrary],
-// // 	// 	// 	res.SUDOCLibrary + suffix, res.RCR}
-// // 	// 	// records = append(records, record)
-// // 	// }
-
-// // t := time.Now()
-// // format := fmt.Sprintf("%d%02d%02d-%02d%02d%02d", t.Year(), t.Month(), t.Day(),
-// // 	t.Hour(), t.Minute(), t.Second())
-// // filename := "resultats_" + format + ".csv"
-// // f, err := os.Create(filename)
-// // defer f.Close()
-
-// // if err != nil {
-// // 	log.Fatal("failed to open file", err)
-// // }
-
-// // w := csv.NewWriter(f)
-// // err = w.WriteAll(records)
-
-// // if err != nil {
-// // 	log.Fatal(err)
-// // }
-// }
-
-// func filter(s, ignored []string) []string {
-// var result []string
-// for _, elem := range s {
-// 	if !slices.Contains(ignored, elem) {
-// 		result = append(result, elem)
-// 	}
-// }
-// return result
-// }
