@@ -56,7 +56,6 @@ func main() {
 	for _, record := range records {
 		locs, err := ctrl.SUClient.GetFilteredLocations(record.PPN, ctrl.Config.FollowedRCR)
 		if err != nil {
-			log.Println(err)
 			continue
 		}
 		if len(locs) > 0 {
