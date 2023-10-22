@@ -33,27 +33,27 @@ type HttpRequester func(string) ([]byte, error)
 // Note that the SUDOC API ignores unknown PPNs when requested with a
 // muli-request.
 func (f *HttpFetch) FetchAll(ppns []string) [][]byte {
-	return fetchBatch(ppns, 20, fetch)
+	return fetchBatch(ppns, 20, Fetch)
 }
 
 // FetchRCR returns a XML iln2rcr response from a list of ILNs.
 func (f *HttpFetch) FetchRCR(ilns []string) []byte {
-	data, _ := fetch(iln2rcr_url + strings.Join(ilns, ","))
+	data, _ := Fetch(iln2rcr_url + strings.Join(ilns, ","))
 	return data
 }
 
 func (f *HttpFetch) FetchMarc(ppn string) []byte {
-	data, _ := fetch(marcxml_url + ppn + ".xml")
+	data, _ := Fetch(marcxml_url + ppn + ".xml")
 	return data
 }
 
 func FetchMarc(ppn string) ([]byte, error) {
-	return fetch(marcxml_url + ppn + ".xml")
+	return Fetch(marcxml_url + ppn + ".xml")
 }
 
 // Fetch returns the xml record corresponding to the given URL, or nil if
 // unsucessful
-func fetch(url string) ([]byte, error) {
+func Fetch(url string) ([]byte, error) {
 	resp, err := http.Get(url)
 	if err != nil {
 		// if request time out, just ignore

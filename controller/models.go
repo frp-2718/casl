@@ -2,6 +2,7 @@ package controller
 
 import (
 	"casl/entities"
+	"casl/exl"
 	"fmt"
 	"strings"
 )
@@ -12,6 +13,8 @@ type suClient interface {
 }
 
 type almaClient interface {
+	GetMMSfromPPN(ppn string) ([]string, error)
+	GetHoldingsFromPPN(ppn string) ([]exl.Holding, error)
 }
 
 type Controller struct {

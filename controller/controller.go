@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"casl/exl"
 	"casl/sudoc"
 	"encoding/csv"
 	"encoding/json"
@@ -18,6 +19,7 @@ func NewController(configFile string) Controller {
 	ctrl.getRCRs()
 
 	ctrl.SUClient = sudoc.NewSudocClient()
+	ctrl.AlmaClient = exl.NewAlmaClient(ctrl.Config.AlmaAPIKey, "")
 
 	return ctrl
 }
