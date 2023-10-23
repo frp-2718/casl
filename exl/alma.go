@@ -48,9 +48,10 @@ func (a *AlmaClient) GetMMSfromPPN(ppn string) ([]string, error) {
 	}
 	result := []string{}
 	for _, bib := range bibs.Bibs {
-		if ppnMatch(bib.Network_numbers, ppn) {
-			result = append(result, bib.MMS_id)
-		}
+		// if ppnMatch(bib.Network_numbers, ppn) {
+		// 	result = append(result, bib.MMS_id)
+		// }
+		result = append(result, bib.MMS_id)
 	}
 	return result, nil
 }

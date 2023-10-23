@@ -22,14 +22,24 @@ type holdingsResult struct {
 }
 
 type Holding struct {
-	Library    string `xml:"library"`
-	Location   string `xml:"location"`
-	CallNumber string `xml:"call_number"`
+	Suppress_from_publishing bool
+	Library_name             string `xml:"library"`
+	Library_code             string
+	Location_name            string `xml:"location"`
+	Location_code            string
+	CallNumber               string `xml:"call_number"`
+}
+
+type Item struct {
+	Holding_data Holding
+	Status       string
+	Process_name string
+	Process_code string
 }
 
 func (h Holding) String() string {
 	return fmt.Sprintf("---\nLibrary: %s\nLocation: %s\nCallNumber: %s\n",
-		h.Library, h.Location, h.CallNumber)
+		h.Library_name, h.Location_name, h.CallNumber)
 }
 
 func decodeBibsXML(data []byte) (*bibsResult, error) {
