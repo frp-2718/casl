@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"log"
+	"strings"
 )
 
 type almaBib struct {
@@ -22,24 +23,68 @@ type holdingsResult struct {
 }
 
 type Holding struct {
-	Suppress_from_publishing bool
-	Library_name             string `xml:"library"`
-	Library_code             string
-	Location_name            string `xml:"location"`
-	Location_code            string
+	Suppress_from_publishing bool   `xml:"holding_suppress_from_publishing"`
+	MMS                      string `xml:"holding_id"`
 	CallNumber               string `xml:"call_number"`
 }
 
 type Item struct {
-	Holding_data Holding
-	Status       string
-	Process_name string
-	Process_code string
+	XMLName      xml.Name `xml:"item"`
+	Holding_data Holding  `xml:"holding_data"`
+	Details      ItemData `xml:"item_data"`
+}
+
+type ItemData struct {
+	Status   Status   `xml:"base_status"`
+	Process  Process  `xml:"process_type"`
+	Library  Library  `xml:"library"`
+	Location Location `xml:"location"`
+}
+
+type Library struct {
+	Name string `xml:"desc,attr"`
+	Code string `xml:",chardata"`
+}
+
+type Location struct {
+	Name string `xml:"desc,attr"`
+	Code string `xml:",chardata"`
+}
+
+type Process struct {
+	Name string `xml:"desc,attr"`
+	Code string `xml:",chardata"`
+}
+
+type Status struct {
+	Code   string `xml:"desc,attr"`
+	Number string `xml:",chardata"`
+}
+
+type Items struct {
+	XMLName xml.Name `xml:"items"`
+	Items   []Item   `xml:"item"`
+}
+
+func (i Item) String() string {
+	return fmt.Sprintf("%s%s\n", i.Holding_data, i.Details)
 }
 
 func (h Holding) String() string {
-	return fmt.Sprintf("---\nLibrary: %s\nLocation: %s\nCallNumber: %s\n",
-		h.Library_name, h.Location_name, h.CallNumber)
+	var sb strings.Builder
+	fmt.Fprintf(&sb, "Published: %t\n", h.Suppress_from_publishing)
+	fmt.Fprintf(&sb, "Call number: %s\n", h.CallNumber)
+	fmt.Fprintf(&sb, "MMS: %s\n", h.MMS)
+	return sb.String()
+}
+
+func (i ItemData) String() string {
+	var sb strings.Builder
+	fmt.Fprintf(&sb, "Status: %s\n", i.Status)
+	fmt.Fprintf(&sb, "Library: %s\n", i.Library)
+	fmt.Fprintf(&sb, "Location: %s\n", i.Location)
+	fmt.Fprintf(&sb, "Process: %s\n", i.Process)
+	return sb.String()
 }
 
 func decodeBibsXML(data []byte) (*bibsResult, error) {
@@ -116,4 +161,15 @@ func decodeHoldingsXML(data []byte) ([]Holding, error) {
 		return nil, err
 	}
 	return h.Holdings, nil
+}
+
+func DecodeItemsXML(data []byte) ([]Item, error) {
+	var items Items
+	items.Items = []Item{}
+	err := xml.Unmarshal(data, &items)
+	if err != nil {
+		log.Printf("alma: decodeHoldingsXML: %v", err)
+		return nil, err
+	}
+	return items.Items, nil
 }

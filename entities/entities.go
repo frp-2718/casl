@@ -24,9 +24,19 @@ type SudocLocation struct {
 }
 
 type AlmaLocation struct {
-	Collection string
-	OwnerCode  string
-	RCR        []string
+	Library_name  string
+	Library_code  string
+	Location_name string
+	Location_code string
+	Call_number   string
+	Published     bool
+	Items         []*AlmaItem
+}
+
+type AlmaItem struct {
+	Process_name string
+	Process_code string
+	Status       string
 }
 
 // TODO: complete the string representation of a BibRecord
@@ -44,13 +54,28 @@ func (s SudocLocation) String() string {
 		s.ILN, s.RCR, s.Name, s.Sublocation)
 }
 
+func (a AlmaLocation) String() string {
+	var sb strings.Builder
+	fmt.Fprintln(&sb, "*********************************")
+	fmt.Fprintf(&sb, "Library: %s (%s)\n", a.Library_name, a.Library_code)
+	fmt.Fprintf(&sb, "Location: %s (%s)\n", a.Location_name, a.Location_code)
+	fmt.Fprintf(&sb, "Call number: %s\n", a.Call_number)
+	fmt.Fprintf(&sb, "Unpublished: %t\n", a.Published)
+	for _, item := range a.Items {
+		fmt.Fprintf(&sb, "\tProcess: %s (%s)\n", item.Process_name, item.Process_code)
+		fmt.Fprintf(&sb, "\tStatus: %s\n", item.Status)
+		fmt.Fprintln(&sb, "\t---------")
+	}
+	return sb.String()
+}
+
 func (r BibRecord) toCSV() [][]string {
 	var records [][]string
 	for _, sudocLoc := range r.SudocLocations {
 		records = append(records, []string{r.PPN, sudocLoc.ILN, "", sudocLoc.Name + " - " + sudocLoc.Sublocation, sudocLoc.RCR})
 	}
 	for _, almaLoc := range r.AlmaLocations {
-		records = append(records, []string{r.PPN, "", almaLoc.OwnerCode, "", ""})
+		records = append(records, []string{r.PPN, "", almaLoc.Library_name, "", ""})
 	}
 	return records
 }

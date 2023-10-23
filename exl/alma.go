@@ -4,8 +4,10 @@
 package exl
 
 import (
+	"casl/entities"
 	"casl/requests"
 	"errors"
+	"fmt"
 	"log"
 )
 
@@ -19,6 +21,7 @@ const almawsURL = "https://api-eu.hosted.exlibrisgroup.com/almaws/v1/"
 const (
 	holdings_t int = iota
 	bibs_t
+	items_t
 )
 
 // New creates an Alma client with the default http client if none is provided.
@@ -36,7 +39,7 @@ func NewAlmaClient(apiKey, baseURL string) *AlmaClient {
 // GetMMSfromPPN returns a list of MMS corresponding to the given PPN, or
 // NotFoundError.
 func (a *AlmaClient) GetMMSfromPPN(ppn string) ([]string, error) {
-	data, err := requests.Fetch(a.buildURL(bibs_t, string(ppn)))
+	data, err := requests.Fetch(a.buildURL(bibs_t, "(PPN)"+ppn))
 	if err != nil { // HTTP errors, including NotFoundError
 		// log.Printf("alma: GetMMSfromPPN: %v", err)
 		return nil, err
@@ -54,6 +57,25 @@ func (a *AlmaClient) GetMMSfromPPN(ppn string) ([]string, error) {
 		result = append(result, bib.MMS_id)
 	}
 	return result, nil
+}
+
+// max 100 items
+func (a *AlmaClient) GetItems(mms string) ([]Item, error) {
+	data, err := requests.Fetch(a.buildURL(items_t, mms))
+	if err != nil {
+		// log.Printf("alma: GetHoldings: %v", err)
+		return nil, err
+	}
+	items, err := DecodeItemsXML(data)
+	if err != nil {
+		log.Printf("alma: GetItems: %v", err)
+		return nil, errors.New("alma: GetItems: unable to decode XML data")
+	}
+	return items, nil
+}
+
+func (a *AlmaClient) DecodeItemsXML(data []byte) ([]Item, error) {
+	return DecodeItemsXML(data)
 }
 
 // GetHoldings returns a list of holdings, potentially empty, attached to the
@@ -91,12 +113,54 @@ func (a *AlmaClient) GetHoldingsFromPPN(ppn string) ([]Holding, error) {
 	return result, nil
 }
 
+func (a *AlmaClient) GetAlmaLocation(ppn string) ([]*entities.AlmaLocation, error) {
+	var res []*entities.AlmaLocation
+	mms, err := a.GetMMSfromPPN(ppn)
+	if err != nil {
+		return res, err
+	}
+	if len(mms) == 0 {
+		return res, fmt.Errorf("GetAlmaLocation: PPN %s not found", ppn)
+	}
+	// TODO: manage the multi-MMS case
+	items, err := a.GetItems(mms[0])
+	fmt.Printf("# items : %d\n", len(items))
+	items_by_mms := make(map[string][]Item)
+	for _, item := range items {
+		items_by_mms[item.Holding_data.MMS] = append(items_by_mms[item.Holding_data.MMS], item)
+	}
+
+	for _, v := range items_by_mms {
+		var location entities.AlmaLocation
+		var items []*entities.AlmaItem
+		for _, item := range v {
+			var almaItem entities.AlmaItem
+			almaItem.Process_code = item.Details.Process.Code
+			almaItem.Process_name = item.Details.Process.Name
+			almaItem.Status = item.Details.Status.Code
+			items = append(items, &almaItem)
+		}
+		location.Library_name = v[0].Details.Library.Name
+		location.Library_code = v[0].Details.Library.Code
+		location.Location_code = v[0].Details.Location.Code
+		location.Location_name = v[0].Details.Location.Name
+		location.Call_number = v[0].Holding_data.CallNumber
+		location.Published = v[0].Holding_data.Suppress_from_publishing
+		location.Items = items
+		res = append(res, &location)
+	}
+
+	return res, nil
+}
+
 func (a *AlmaClient) buildURL(urlType int, id string) string {
 	switch urlType {
 	case bibs_t:
 		return a.baseURL + "bibs?view=brief&expand=None&other_system_id=" + id + "&apikey=" + a.apiKey
 	case holdings_t:
 		return a.baseURL + "bibs/" + id + "/holdings?apikey=" + a.apiKey
+	case items_t:
+		return a.baseURL + "bibs/" + id + "/holdings/ALL/items?limit=100&apikey=" + a.apiKey
 	default:
 		return a.baseURL + "/" + id
 	}

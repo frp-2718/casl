@@ -67,11 +67,8 @@ func main() {
 
 	// entities.WriteCSV(results)
 
-	for _, record := range records {
-		mms, _ := ctrl.AlmaClient.GetMMSfromPPN(record.PPN)
-		fmt.Printf("*** PPN %s ***\n", record.PPN)
-		fmt.Println(mms)
-	}
+	loc, _ := ctrl.AlmaClient.GetAlmaLocation("240437543")
+	fmt.Println(loc)
 
 	elapsed := time.Since(start)
 	fmt.Printf("Elapsed time: %s\n", elapsed)
