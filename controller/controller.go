@@ -17,6 +17,7 @@ func NewController(configFile string) Controller {
 	ctrl.loadConfig(configFile)
 	ctrl.getMappingsFromCSV(ctrl.Config.MappingFilePath)
 	ctrl.getRCRs()
+	ctrl.getLibs()
 
 	ctrl.SUClient = sudoc.NewSudocClient()
 	ctrl.AlmaClient = exl.NewAlmaClient(ctrl.Config.AlmaAPIKey, "")
@@ -49,6 +50,16 @@ func (ctrl *Controller) getRCRs() {
 	}
 
 	ctrl.Config.FollowedRCR = rcrs
+}
+
+func (ctrl *Controller) getLibs() {
+	libs := make([]string, 0, len(ctrl.Mappings.alma2str))
+
+	for k := range ctrl.Mappings.alma2str {
+		libs = append(libs, k)
+	}
+
+	ctrl.Config.FolowedLibs = libs
 }
 
 func (ctrl *Controller) getMappingsFromCSV(csv_file string) {

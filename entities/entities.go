@@ -83,16 +83,6 @@ func (r BibRecord) toCSV() [][]string {
 	return records
 }
 
-func (a AlmaLocation) Valid() bool {
-	valid := true
-	for _, item := range a.Items {
-		// TODO: use a slice instead of "ACQ" to be able to add status to be
-		// ignored
-		valid = valid && item.Process_code != "ACQ"
-	}
-	return valid && a.NoDiscovery
-}
-
 func WriteCSV(results []BibRecord) {
 	var records [][]string
 	records = append(records, []string{"PPN", "ILN", "Bibliothèque Alma",
@@ -119,6 +109,20 @@ func WriteCSV(results []BibRecord) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func validLocation(a AlmaLocation) bool {
+	if a.NoDiscovery || a.Items == nil || len(a.Items) == 0 {
+		return false
+	}
+	for _, item := range a.Items {
+		// TODO: use a slice instead of "ACQ" to be able to add status to be
+		// ignored
+		if item.Process_code != "ACQ" {
+			return true
+		}
+	}
+	return false
 }
 
 func Filter[T any](collection []T, test func(T) bool) []T {

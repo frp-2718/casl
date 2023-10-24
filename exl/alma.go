@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"slices"
 )
 
 type AlmaClient struct {
@@ -113,7 +114,22 @@ func (a *AlmaClient) GetHoldingsFromPPN(ppn string) ([]Holding, error) {
 	return result, nil
 }
 
-func (a *AlmaClient) GetAlmaLocation(ppn string) ([]*entities.AlmaLocation, error) {
+func (a *AlmaClient) GetFilteredLocations(ppn string, lib_codes []string) ([]*entities.AlmaLocation, error) {
+	locations, err := a.GetLocations(ppn)
+	var filtered []*entities.AlmaLocation
+	if err != nil {
+		return filtered, err
+	}
+
+	for _, location := range locations {
+		if slices.Contains(lib_codes, location.Library_code) {
+			filtered = append(filtered, location)
+		}
+	}
+	return filtered, nil
+}
+
+func (a *AlmaClient) GetLocations(ppn string) ([]*entities.AlmaLocation, error) {
 	var res []*entities.AlmaLocation
 	mms, err := a.GetMMSfromPPN(ppn)
 	if err != nil {

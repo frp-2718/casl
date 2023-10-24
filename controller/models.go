@@ -12,8 +12,8 @@ type suClient interface {
 }
 
 type almaClient interface {
-	GetMMSfromPPN(ppn string) ([]string, error)
-	GetAlmaLocation(ppn string) ([]*entities.AlmaLocation, error)
+	GetLocations(ppn string) ([]*entities.AlmaLocation, error)
+	GetFilteredLocations(ppn string, lib_codes []string) ([]*entities.AlmaLocation, error)
 }
 
 type Controller struct {
@@ -31,6 +31,7 @@ type config struct {
 	IgnoredSudocRCR []string `json:"ignored_sudoc_rcr"`
 	MonolithicRCR   []string `json:"monolithic_rcr"`
 	FollowedRCR     []string
+	FolowedLibs     []string
 }
 
 // Mappings Alma/RCR, Alma/Libraries names, RCR/ILN, RCR/label, read from CSV.
