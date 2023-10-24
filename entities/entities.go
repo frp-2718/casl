@@ -29,7 +29,7 @@ type AlmaLocation struct {
 	Location_name string
 	Location_code string
 	Call_number   string
-	Published     bool
+	NoDiscovery   bool
 	Items         []*AlmaItem
 }
 
@@ -63,7 +63,7 @@ func (a AlmaLocation) String() string {
 	fmt.Fprintf(&sb, "Library: %s (%s)\n", a.Library_name, a.Library_code)
 	fmt.Fprintf(&sb, "Location: %s (%s)\n", a.Location_name, a.Location_code)
 	fmt.Fprintf(&sb, "Call number: %s\n", a.Call_number)
-	fmt.Fprintf(&sb, "Unpublished: %t\n", a.Published)
+	fmt.Fprintf(&sb, "Suppressed from discovery: %t\n", a.NoDiscovery)
 	for _, item := range a.Items {
 		fmt.Fprintf(&sb, "\tProcess: %s (%s)\n", item.Process_name, item.Process_code)
 		fmt.Fprintf(&sb, "\tStatus: %s\n", item.Status)
@@ -81,6 +81,16 @@ func (r BibRecord) toCSV() [][]string {
 		records = append(records, []string{r.PPN, "", almaLoc.Library_name, "", ""})
 	}
 	return records
+}
+
+func (a AlmaLocation) Valid() bool {
+	valid := true
+	for _, item := range a.Items {
+		// TODO: use a slice instead of "ACQ" to be able to add status to be
+		// ignored
+		valid = valid && item.Process_code != "ACQ"
+	}
+	return valid && a.NoDiscovery
 }
 
 func WriteCSV(results []BibRecord) {

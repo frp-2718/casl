@@ -144,7 +144,7 @@ func (a *AlmaClient) GetAlmaLocation(ppn string) ([]*entities.AlmaLocation, erro
 		location.Location_code = v[0].Details.Location.Code
 		location.Location_name = v[0].Details.Location.Name
 		location.Call_number = v[0].Holding_data.CallNumber
-		location.Published = v[0].Holding_data.Suppress_from_publishing
+		location.NoDiscovery = v[0].Holding_data.Suppress_from_publishing
 		location.Items = items
 		res = append(res, &location)
 	}
