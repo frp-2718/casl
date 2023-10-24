@@ -124,7 +124,6 @@ func (a *AlmaClient) GetAlmaLocation(ppn string) ([]*entities.AlmaLocation, erro
 	}
 	// TODO: manage the multi-MMS case
 	items, err := a.GetItems(mms[0])
-	fmt.Printf("# items : %d\n", len(items))
 	items_by_mms := make(map[string][]Item)
 	for _, item := range items {
 		items_by_mms[item.Holding_data.MMS] = append(items_by_mms[item.Holding_data.MMS], item)

@@ -53,22 +53,32 @@ func main() {
 
 	fmt.Printf("%d PPN à vérifier...\n", len(ppns))
 
-	// var results []entities.BibRecord
-	// for _, record := range records {
-	// 	locs, err := ctrl.SUClient.GetFilteredLocations(record.PPN, ctrl.Config.FollowedRCR)
-	// 	if err != nil {
-	// 		continue
-	// 	}
-	// 	if len(locs) > 0 {
-	// 		record.SudocLocations = locs
-	// 		results = append(results, record)
-	// 	}
-	// }
+	var results []entities.BibRecord
+	for _, record := range records {
+		sudoc, err := ctrl.SUClient.GetFilteredLocations(record.PPN, ctrl.Config.FollowedRCR)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		if len(sudoc) > 0 {
+			record.SudocLocations = sudoc
+		}
+		alma, err := ctrl.AlmaClient.GetAlmaLocation(record.PPN)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		if len(alma) > 0 {
+			record.AlmaLocations = alma
+		}
+		results = append(results, record)
+	}
+
+	for _, res := range results {
+		fmt.Println(res)
+	}
 
 	// entities.WriteCSV(results)
-
-	loc, _ := ctrl.AlmaClient.GetAlmaLocation("240437543")
-	fmt.Println(loc)
 
 	elapsed := time.Since(start)
 	fmt.Printf("Elapsed time: %s\n", elapsed)

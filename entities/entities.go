@@ -44,7 +44,10 @@ func (r BibRecord) String() string {
 	var sb strings.Builder
 	fmt.Fprintf(&sb, "*** PPN: %s\n\n", r.PPN)
 	for _, sl := range r.SudocLocations {
-		fmt.Fprintf(&sb, "%s----------\n", sl)
+		fmt.Fprintf(&sb, "%s\n", sl)
+	}
+	for _, al := range r.AlmaLocations {
+		fmt.Fprintf(&sb, "%s\n", al)
 	}
 	return sb.String()
 }
@@ -106,4 +109,14 @@ func WriteCSV(results []BibRecord) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func Filter[T any](collection []T, test func(T) bool) []T {
+	var res []T
+	for _, e := range collection {
+		if test(e) {
+			res = append(res, e)
+		}
+	}
+	return res
 }
