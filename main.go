@@ -74,8 +74,13 @@ func main() {
 		results = append(results, record)
 	}
 
+	var sums []controller.Summary
 	for _, res := range results {
-		fmt.Println(res)
+		sums = append(sums, ctrl.Compare(&res)...)
+	}
+
+	for _, sum := range sums {
+		fmt.Println(sum)
 	}
 
 	// entities.WriteCSV(results)

@@ -122,7 +122,7 @@ func (a *AlmaClient) GetFilteredLocations(ppn string, lib_codes []string) ([]*en
 	}
 
 	for _, location := range locations {
-		if slices.Contains(lib_codes, location.Library_code) {
+		if slices.Contains(lib_codes, location.Library_code) && entities.ValidLocation(*location) {
 			filtered = append(filtered, location)
 		}
 	}

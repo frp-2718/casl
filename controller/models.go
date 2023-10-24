@@ -40,6 +40,7 @@ type mappings struct {
 	rcr2iln  map[string]string
 	alma2str map[string]string
 	rcr2str  map[string]string
+	rcr2alma map[string][]string
 }
 
 func (c Controller) String() string {

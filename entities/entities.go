@@ -111,7 +111,7 @@ func WriteCSV(results []BibRecord) {
 	}
 }
 
-func validLocation(a AlmaLocation) bool {
+func ValidLocation(a AlmaLocation) bool {
 	if a.NoDiscovery || a.Items == nil || len(a.Items) == 0 {
 		return false
 	}
@@ -123,14 +123,4 @@ func validLocation(a AlmaLocation) bool {
 		}
 	}
 	return false
-}
-
-func Filter[T any](collection []T, test func(T) bool) []T {
-	var res []T
-	for _, e := range collection {
-		if test(e) {
-			res = append(res, e)
-		}
-	}
-	return res
 }

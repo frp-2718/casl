@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"casl/entities"
 	"casl/exl"
 	"casl/sudoc"
 	"encoding/csv"
@@ -65,6 +66,7 @@ func (ctrl *Controller) getLibs() {
 func (ctrl *Controller) getMappingsFromCSV(csv_file string) {
 	var maps mappings
 	maps.alma2rcr = make(map[string][]string)
+	maps.rcr2alma = make(map[string][]string)
 	maps.rcr2iln = make(map[string]string)
 	maps.alma2str = make(map[string]string)
 	maps.rcr2str = make(map[string]string)
@@ -84,9 +86,72 @@ func (ctrl *Controller) getMappingsFromCSV(csv_file string) {
 			log.Fatal(err)
 		}
 		maps.alma2rcr[record[1]] = append(maps.alma2rcr[record[1]], record[2])
+		maps.rcr2alma[record[1]] = append(maps.rcr2alma[record[2]], record[1])
 		maps.rcr2iln[record[2]] = record[3]
 		maps.alma2str[record[1]] = record[0]
 		maps.rcr2str[record[2]] = record[4]
 	}
 	ctrl.Mappings = &maps
 }
+
+type Summary struct {
+	ILN      string
+	RCR      string
+	PPN      string
+	SudocLib string
+	AlmaLib  string
+}
+
+func (ctrl *Controller) Compare(record *entities.BibRecord) []Summary {
+	var anomalies []Summary
+
+MAIN_SU_LOOP:
+	for _, sloc := range record.SudocLocations {
+		almaLibs := ctrl.Mappings.rcr2alma[sloc.RCR]
+		for _, aloc := range record.AlmaLocations {
+			if slices.Contains(almaLibs, aloc.Library_code) {
+				continue MAIN_SU_LOOP
+			} else {
+				anomalies = append(anomalies, Summary{ILN: sloc.ILN, RCR: sloc.RCR, PPN: record.PPN, SudocLib: ctrl.Mappings.rcr2str[sloc.RCR], AlmaLib: ""})
+			}
+		}
+	}
+
+MAIN_ALMA_LOOP:
+	for _, aloc := range record.AlmaLocations {
+		rcrs := ctrl.Mappings.alma2rcr[aloc.Library_code]
+		for _, sloc := range record.SudocLocations {
+			if slices.Contains(rcrs, sloc.RCR) {
+				continue MAIN_ALMA_LOOP
+			} else {
+				anomalies = append(anomalies, Summary{ILN: sloc.ILN, RCR: sloc.RCR, PPN: record.PPN, SudocLib: "", AlmaLib: ctrl.Mappings.alma2str[aloc.Library_code]})
+			}
+		}
+	}
+
+	return anomalies
+}
+
+// type BibRecord struct {
+// 	PPN            string
+// 	MMS            string
+// 	SudocLocations []*SudocLocation
+// 	AlmaLocations  []*AlmaLocation
+// }
+
+// type SudocLocation struct {
+// 	ILN         string
+// 	RCR         string
+// 	Name        string
+// 	Sublocation string
+// }
+
+// type AlmaLocation struct {
+// 	Library_name  string
+// 	Library_code  string
+// 	Location_name string
+// 	Location_code string
+// 	Call_number   string
+// 	NoDiscovery   bool
+// 	Items         []*AlmaItem
+// }
