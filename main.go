@@ -83,11 +83,12 @@ func main() {
 		fmt.Println(sum)
 	}
 
-	// entities.WriteCSV(results)
+	ctrl.WriteCSV(sums)
 
 	elapsed := time.Since(start)
 	fmt.Printf("Elapsed time: %s\n", elapsed)
 
+	fmt.Println()
 	fmt.Println("ALMA STATS")
 	fmt.Println(ctrl.AlmaClient.Stats())
 	fmt.Println("SUDOC STATS")

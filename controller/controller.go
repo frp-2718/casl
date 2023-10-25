@@ -6,10 +6,12 @@ import (
 	"casl/sudoc"
 	"encoding/csv"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"os"
 	"slices"
+	"time"
 )
 
 func NewController(configFile string) Controller {
@@ -112,7 +114,11 @@ MAIN_SU_LOOP:
 			if slices.Contains(almaLibs, aloc.Library_code) {
 				continue MAIN_SU_LOOP
 			} else {
-				anomalies = append(anomalies, Summary{ILN: sloc.ILN, RCR: sloc.RCR, PPN: record.PPN, SudocLib: ctrl.Mappings.rcr2str[sloc.RCR], AlmaLib: ""})
+				library := ctrl.Mappings.rcr2str[sloc.RCR]
+				if slices.Contains(ctrl.Config.MonolithicRCR, sloc.RCR) {
+					library += " - " + sloc.Sublocation
+				}
+				anomalies = append(anomalies, Summary{ILN: sloc.ILN, RCR: sloc.RCR, PPN: record.PPN, SudocLib: library, AlmaLib: ""})
 			}
 		}
 	}
@@ -130,4 +136,37 @@ MAIN_ALMA_LOOP:
 	}
 
 	return anomalies
+}
+
+func (s Summary) toCSV() []string {
+	records := []string{s.PPN, s.ILN, s.AlmaLib, s.SudocLib, s.RCR}
+	return records
+}
+
+func (ctrl *Controller) WriteCSV(results []Summary) {
+	var records [][]string
+	records = append(records, []string{"PPN", "ILN", "Bibliothèque Alma",
+		"Bibliothèque SUDOC", "RCR"})
+
+	for _, res := range results {
+		records = append(records, res.toCSV())
+	}
+
+	t := time.Now()
+	format := fmt.Sprintf("%d%02d%02d-%02d%02d%02d", t.Year(), t.Month(), t.Day(),
+		t.Hour(), t.Minute(), t.Second())
+	filename := "resultats_" + format + ".csv"
+	f, err := os.Create(filename)
+	defer f.Close()
+
+	if err != nil {
+		log.Fatal("failed to open file", err)
+	}
+
+	w := csv.NewWriter(f)
+	err = w.WriteAll(records)
+
+	if err != nil {
+		log.Fatal(err)
+	}
 }
