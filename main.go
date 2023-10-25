@@ -79,10 +79,6 @@ func main() {
 		sums = append(sums, ctrl.Compare(&res)...)
 	}
 
-	for _, sum := range sums {
-		fmt.Println(sum)
-	}
-
 	ctrl.WriteCSV(sums)
 
 	elapsed := time.Since(start)

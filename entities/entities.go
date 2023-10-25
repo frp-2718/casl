@@ -112,7 +112,7 @@ func WriteCSV(results []BibRecord) {
 }
 
 func ValidLocation(a AlmaLocation) bool {
-	if a.NoDiscovery || a.Items == nil || len(a.Items) == 0 {
+	if a.NoDiscovery || a.Items == nil || len(a.Items) == 0 || a.Location_code == "PILON" || a.Location_code == "PERDU" {
 		return false
 	}
 	for _, item := range a.Items {

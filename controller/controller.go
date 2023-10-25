@@ -113,14 +113,13 @@ MAIN_SU_LOOP:
 		for _, aloc := range record.AlmaLocations {
 			if slices.Contains(almaLibs, aloc.Library_code) {
 				continue MAIN_SU_LOOP
-			} else {
-				library := ctrl.Mappings.rcr2str[sloc.RCR]
-				if slices.Contains(ctrl.Config.MonolithicRCR, sloc.RCR) {
-					library += " - " + sloc.Sublocation
-				}
-				anomalies = append(anomalies, Summary{ILN: sloc.ILN, RCR: sloc.RCR, PPN: record.PPN, SudocLib: library, AlmaLib: ""})
 			}
 		}
+		library := ctrl.Mappings.rcr2str[sloc.RCR]
+		if slices.Contains(ctrl.Config.MonolithicRCR, sloc.RCR) && sloc.Sublocation != "" {
+			library += " - " + sloc.Sublocation
+		}
+		anomalies = append(anomalies, Summary{ILN: sloc.ILN, RCR: sloc.RCR, PPN: record.PPN, SudocLib: library, AlmaLib: ""})
 	}
 
 MAIN_ALMA_LOOP:
@@ -129,10 +128,9 @@ MAIN_ALMA_LOOP:
 		for _, sloc := range record.SudocLocations {
 			if slices.Contains(rcrs, sloc.RCR) {
 				continue MAIN_ALMA_LOOP
-			} else {
-				anomalies = append(anomalies, Summary{ILN: sloc.ILN, RCR: sloc.RCR, PPN: record.PPN, SudocLib: "", AlmaLib: ctrl.Mappings.alma2str[aloc.Library_code]})
 			}
 		}
+		anomalies = append(anomalies, Summary{ILN: ctrl.Mappings.rcr2iln[rcrs[0]], RCR: rcrs[0], PPN: record.PPN, SudocLib: "", AlmaLib: ctrl.Mappings.alma2str[aloc.Library_code]})
 	}
 
 	return anomalies

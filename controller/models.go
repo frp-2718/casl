@@ -75,6 +75,10 @@ func (m mappings) String() string {
 	for k, v := range m.alma2rcr {
 		fmt.Fprintf(&sb, "%s -> %v\n", k, v)
 	}
+	fmt.Fprintln(&sb, "\n-- RCR -> Alma:")
+	for k, v := range m.rcr2alma {
+		fmt.Fprintf(&sb, "%s -> %v\n", k, v)
+	}
 	fmt.Fprintln(&sb, "\n-- RCR -> ILN:")
 	for k, v := range m.rcr2iln {
 		fmt.Fprintf(&sb, "%s -> %v\n", k, v)
