@@ -87,4 +87,9 @@ func main() {
 
 	elapsed := time.Since(start)
 	fmt.Printf("Elapsed time: %s\n", elapsed)
+
+	fmt.Println("ALMA STATS")
+	fmt.Println(ctrl.AlmaClient.Stats())
+	fmt.Println("SUDOC STATS")
+	fmt.Println(ctrl.SUClient.Stats())
 }

@@ -15,6 +15,13 @@ import (
 type AlmaClient struct {
 	apiKey  string
 	baseURL string
+	stats   stats
+}
+
+type stats struct {
+	holdings_req int
+	bibs_req     int
+	items_req    int
 }
 
 const almawsURL = "https://api-eu.hosted.exlibrisgroup.com/almaws/v1/"
@@ -34,12 +41,14 @@ func NewAlmaClient(apiKey, baseURL string) *AlmaClient {
 	} else {
 		alma.baseURL = baseURL
 	}
+	alma.stats = stats{}
 	return alma
 }
 
 // GetMMSfromPPN returns a list of MMS corresponding to the given PPN, or
 // NotFoundError.
 func (a *AlmaClient) GetMMSfromPPN(ppn string) ([]string, error) {
+	a.stats.bibs_req += 1
 	data, err := requests.Fetch(a.buildURL(bibs_t, "(PPN)"+ppn))
 	if err != nil { // HTTP errors, including NotFoundError
 		// log.Printf("alma: GetMMSfromPPN: %v", err)
@@ -60,8 +69,15 @@ func (a *AlmaClient) GetMMSfromPPN(ppn string) ([]string, error) {
 	return result, nil
 }
 
+func (a *AlmaClient) Stats() string {
+	total := a.stats.bibs_req + a.stats.holdings_req + a.stats.items_req
+	return fmt.Sprintf("bibs: %d\nholdings: %d\nitems: %d\ntotal: %d\n",
+		a.stats.bibs_req, a.stats.holdings_req, a.stats.items_req, total)
+}
+
 // max 100 items
 func (a *AlmaClient) GetItems(mms string) ([]Item, error) {
+	a.stats.items_req += 1
 	data, err := requests.Fetch(a.buildURL(items_t, mms))
 	if err != nil {
 		// log.Printf("alma: GetHoldings: %v", err)
@@ -82,6 +98,7 @@ func (a *AlmaClient) DecodeItemsXML(data []byte) ([]Item, error) {
 // GetHoldings returns a list of holdings, potentially empty, attached to the
 // given bib MMS id.
 func (a *AlmaClient) GetHoldings(mms string) ([]Holding, error) {
+	a.stats.holdings_req += 1
 	data, err := requests.Fetch(a.buildURL(holdings_t, string(mms)))
 	if err != nil {
 		// log.Printf("alma: GetHoldings: %v", err)

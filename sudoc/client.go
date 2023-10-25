@@ -17,6 +17,7 @@ import (
 type SudocClient struct {
 	marcxml_url string
 	rcrs        map[string]library
+	stats       int
 }
 
 type library struct {
@@ -52,6 +53,7 @@ func (sc *SudocClient) GetFilteredLocations(ppn string, rcrs []string) ([]*entit
 // TODO: abstract the requester
 func (sc *SudocClient) GetLocations(ppn string) ([]*entities.SudocLocation, error) {
 	var locs []*entities.SudocLocation
+	sc.stats += 1
 	data, err := requests.FetchMarc(ppn)
 	if err != nil {
 		return locs, fmt.Errorf("ppn %s: %w\n", ppn, err)
@@ -81,6 +83,10 @@ func (sc *SudocClient) GetLocations(ppn string) ([]*entities.SudocLocation, erro
 		locs = append(locs, &location)
 	}
 	return locs, nil
+}
+
+func (sc *SudocClient) Stats() string {
+	return fmt.Sprintf("unimarc2marcxml: %d\n", sc.stats)
 }
 
 func (sc *SudocClient) makeRCRs(csv_file string) {

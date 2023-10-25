@@ -9,11 +9,13 @@ import (
 type suClient interface {
 	GetLocations(ppn string) ([]*entities.SudocLocation, error)
 	GetFilteredLocations(ppn string, rcrs []string) ([]*entities.SudocLocation, error)
+	Stats() string
 }
 
 type almaClient interface {
 	GetLocations(ppn string) ([]*entities.AlmaLocation, error)
 	GetFilteredLocations(ppn string, lib_codes []string) ([]*entities.AlmaLocation, error)
+	Stats() string
 }
 
 type Controller struct {
