@@ -86,7 +86,7 @@ func (ctrl *Controller) getMappingsFromCSV(csv_file string) {
 			log.Fatal(err)
 		}
 		maps.alma2rcr[record[1]] = append(maps.alma2rcr[record[1]], record[2])
-		maps.rcr2alma[record[1]] = append(maps.rcr2alma[record[2]], record[1])
+		maps.rcr2alma[record[2]] = append(maps.rcr2alma[record[2]], record[1])
 		maps.rcr2iln[record[2]] = record[3]
 		maps.alma2str[record[1]] = record[0]
 		maps.rcr2str[record[2]] = record[4]
@@ -131,27 +131,3 @@ MAIN_ALMA_LOOP:
 
 	return anomalies
 }
-
-// type BibRecord struct {
-// 	PPN            string
-// 	MMS            string
-// 	SudocLocations []*SudocLocation
-// 	AlmaLocations  []*AlmaLocation
-// }
-
-// type SudocLocation struct {
-// 	ILN         string
-// 	RCR         string
-// 	Name        string
-// 	Sublocation string
-// }
-
-// type AlmaLocation struct {
-// 	Library_name  string
-// 	Library_code  string
-// 	Location_name string
-// 	Location_code string
-// 	Call_number   string
-// 	NoDiscovery   bool
-// 	Items         []*AlmaItem
-// }
