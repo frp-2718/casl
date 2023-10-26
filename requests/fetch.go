@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"sync"
+	"time"
 )
 
 const (
@@ -20,35 +20,43 @@ const (
 const MAX_CONCURRENT_REQUESTS = 50
 
 type Fetcher interface {
-	FetchAll(ppns []string) [][]byte
-	FetchRCR(ilns []string) []byte
-	FetchMarc(ppn string) []byte
+	Fetch(url string) ([]byte, error)
 }
 
-type HttpFetch struct{}
-type HttpRequester func(string) ([]byte, error)
-
-// FetchAll returns all xml data corresponding to each ppn in a map, or
-// nil if unsuccessful.
-// Note that the SUDOC API ignores unknown PPNs when requested with a
-// muli-request.
-func (f *HttpFetch) FetchAll(ppns []string) [][]byte {
-	return fetchBatch(ppns, 20, Fetch)
+type HttpFetcher struct {
+	client *http.Client
 }
 
-// FetchRCR returns a XML iln2rcr response from a list of ILNs.
-func (f *HttpFetch) FetchRCR(ilns []string) []byte {
-	data, _ := Fetch(iln2rcr_url + strings.Join(ilns, ","))
-	return data
+func NewHttpFetch(client *http.Client) Fetcher {
+	var fetcher HttpFetcher
+	if client == http.DefaultClient {
+		fetcher.client = &http.Client{Timeout: 5 * time.Second}
+	} else {
+		fetcher.client = client
+	}
+	return fetcher
 }
 
-func (f *HttpFetch) FetchMarc(ppn string) []byte {
-	data, _ := Fetch(marcxml_url + ppn + ".xml")
-	return data
-}
-
-func FetchMarc(ppn string) ([]byte, error) {
-	return Fetch(marcxml_url + ppn + ".xml")
+func (f HttpFetcher) Fetch(url string) ([]byte, error) {
+	resp, err := f.client.Get(url)
+	if err != nil {
+		// if request time out, just ignore
+		// TODO: delay and request again
+		// TODO: handle other url.errors
+		log.Println(err)
+		return []byte{}, nil
+	}
+	if resp.StatusCode != http.StatusOK {
+		log.Printf("fetch: HTTP status code = %d", resp.StatusCode)
+		return []byte{}, errors.New(strconv.Itoa(resp.StatusCode))
+	}
+	data, err := io.ReadAll(resp.Body)
+	resp.Body.Close()
+	if err != nil {
+		log.Println(err)
+		return []byte{}, err
+	}
+	return data, nil
 }
 
 // Fetch returns the xml record corresponding to the given URL, or nil if
@@ -75,24 +83,47 @@ func Fetch(url string) ([]byte, error) {
 	return data, nil
 }
 
-func fetchBatch(ppns []string, max_params int, request HttpRequester) [][]byte {
-	var tokens = make(chan struct{}, MAX_CONCURRENT_REQUESTS)
-	urls := buildURLs(ppns, max_params)
-	xmlBatch := make([][]byte, len(urls))
-	wg := sync.WaitGroup{}
+// FetchAll returns all xml data corresponding to each ppn in a map, or
+// nil if unsuccessful.
+// Note that the SUDOC API ignores unknown PPNs when requested with a
+// muli-request.
+// func (f *HttpFetch) FetchAll(ppns []string) [][]byte {
+// 	return fetchBatch(ppns, 20, Fetch)
+// }
 
-	for index, url := range urls {
-		wg.Add(1)
-		go func(i int, u string) {
-			tokens <- struct{}{}
-			defer wg.Done()
-			xmlBatch[i], _ = request(u)
-			<-tokens
-		}(index, url)
-	}
-	wg.Wait()
-	return xmlBatch
+// FetchRCR returns a XML iln2rcr response from a list of ILNs.
+// func (f *HttpFetch) FetchRCR(ilns []string) []byte {
+// 	data, _ := Fetch(iln2rcr_url + strings.Join(ilns, ","))
+// 	return data
+// }
+
+// func (f *HttpFetch) FetchMarc(ppn string) []byte {
+// 	data, _ := Fetch(marcxml_url + ppn + ".xml")
+// 	return data
+// }
+
+func FetchMarc(ppn string) ([]byte, error) {
+	return Fetch(marcxml_url + ppn + ".xml")
 }
+
+// func fetchBatch(ppns []string, max_params int, request HttpRequester) [][]byte {
+// 	var tokens = make(chan struct{}, MAX_CONCURRENT_REQUESTS)
+// 	urls := buildURLs(ppns, max_params)
+// 	xmlBatch := make([][]byte, len(urls))
+// 	wg := sync.WaitGroup{}
+
+// 	for index, url := range urls {
+// 		wg.Add(1)
+// 		go func(i int, u string) {
+// 			tokens <- struct{}{}
+// 			defer wg.Done()
+// 			xmlBatch[i], _ = request(u)
+// 			<-tokens
+// 		}(index, url)
+// 	}
+// 	wg.Wait()
+// 	return xmlBatch
+// }
 
 func buildURLs(params []string, max_params int) []string {
 	var urls []string

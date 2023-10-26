@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sudoc service="iln2rcr"><error>Found a null xml in result : values={iln=900}, query=select autorites.iln2rcr(#iln#) from dual </error></sudoc>

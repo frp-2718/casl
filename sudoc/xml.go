@@ -2,6 +2,7 @@ package sudoc
 
 import (
 	"encoding/xml"
+	"errors"
 	"log"
 )
 
@@ -28,6 +29,9 @@ func decodeRCR(data []byte) (map[string]library, error) {
 	err := xml.Unmarshal(data, &result)
 	if err != nil {
 		log.Fatal(err)
+	}
+	if len(result.Queries) == 0 {
+		return nil, errors.New("null xml")
 	}
 	for _, q := range result.Queries {
 		for _, lib := range q.Libraries {

@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/http"
 	"os"
 	"slices"
 	"strings"
@@ -16,8 +17,9 @@ import (
 
 // SudocClient represents the main object to interact with.
 type SudocClient struct {
-	rcrs  map[string]library
-	stats int
+	rcrs    map[string]library
+	stats   int
+	fetcher requests.Fetcher
 }
 
 // internal representation of a library in SUDOC's sense.
@@ -36,6 +38,8 @@ const (
 // from the parameter CSV file.
 func NewSudocClient(ilns []string) (*SudocClient, error) {
 	var client SudocClient
+	client.fetcher = requests.NewHttpFetch(http.DefaultClient)
+
 	rcrs, err := client.getRCRs(ilns)
 	if err != nil {
 		return nil, fmt.Errorf("NewSudocClient: mapping failed: %w", err)
@@ -44,6 +48,9 @@ func NewSudocClient(ilns []string) (*SudocClient, error) {
 	return &client, nil
 }
 
+// GetFilteredLocations gets SUDOC locations of a given PPN, properly filled,
+// from the unimarc2marcxml API. Only the locations regarding the RCRs of
+// interest, given as a second argument, are provided.
 func (sc *SudocClient) GetFilteredLocations(ppn string, rcrs []string) ([]*entities.SudocLocation, error) {
 	locations, err := sc.GetLocations(ppn)
 	var filtered []*entities.SudocLocation
@@ -61,6 +68,8 @@ func (sc *SudocClient) GetFilteredLocations(ppn string, rcrs []string) ([]*entit
 	return filtered, nil
 }
 
+// GetLocations gets all the SUDOC locations of a given PPN, from the
+// unimarc2marcxml API.
 // TODO: abstract the requester
 func (sc *SudocClient) GetLocations(ppn string) ([]*entities.SudocLocation, error) {
 	var locs []*entities.SudocLocation
@@ -129,7 +138,7 @@ func (sc *SudocClient) buildRCRs(csv_file string) error {
 
 func (sc *SudocClient) getRCRs(rcrs []string) (map[string]library, error) {
 	url := ILN2RCR_URL + strings.Join(rcrs, ",")
-	data, err := requests.Fetch(url)
+	data, err := sc.fetcher.Fetch(url)
 	if err != nil {
 		return nil, fmt.Errorf("getRCRs: iln2rcr failed: %w", err)
 	}
@@ -137,6 +146,5 @@ func (sc *SudocClient) getRCRs(rcrs []string) (map[string]library, error) {
 	if err != nil {
 		return nil, fmt.Errorf("getRCRs: decoding XML failed: %w", err)
 	}
-	fmt.Println(url)
 	return result, nil
 }
