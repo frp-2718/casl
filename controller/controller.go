@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-func NewController(configFile string) Controller {
+func NewController(configFile string) (Controller, error) {
 	var ctrl Controller
 
 	ctrl.loadConfig(configFile)
@@ -22,10 +22,14 @@ func NewController(configFile string) Controller {
 	ctrl.getRCRs()
 	ctrl.getLibs()
 
-	ctrl.SUClient = sudoc.NewSudocClient()
+	suclient, err := sudoc.NewSudocClient(ctrl.Config.ILNs)
+	if err != nil {
+		return ctrl, err
+	}
+	ctrl.SUClient = suclient
 	ctrl.AlmaClient = exl.NewAlmaClient(ctrl.Config.AlmaAPIKey, "")
 
-	return ctrl
+	return ctrl, nil
 }
 
 func (ctrl *Controller) loadConfig(configFile string) {

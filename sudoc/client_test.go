@@ -1,63 +1,14 @@
 package sudoc
 
-// import (
-// 	"testing"
-// )
+import (
+	"testing"
+)
 
-// var errorXML = []byte(`<?xml version="1.0" encoding="UTF-8"?>
-// <error>Les données bibliographiques sont indéfinies
-//   <ppn>PPN_IND1</ppn>
-// </error>`)
-
-// var correctXML = []byte(`<?xml version="1.0" encoding="UTF-8"?>
-// <record>
-//   <leader>     cam0 22        450 </leader>
-//   <controlfield tag="003">http://www.sudoc.fr/155075381</controlfield>
-//   <controlfield tag="008">Aax3</controlfield>
-//   <controlfield tag="008">Oay3</controlfield>
-//   <datafield tag="010" ind1=" " ind2=" ">
-//     <subfield code="a">978-2-253-02983-0</subfield>
-//   </datafield>
-//   <datafield tag="200" ind1="1" ind2=" ">
-//     <subfield code="a">Orlando</subfield>
-//     <subfield code="f">Virginia Woolf</subfield>
-//     <subfield code="f">trad de Catherine Pappo</subfield>
-//   </datafield>
-//   <datafield tag="410" ind1=" " ind2="|">
-//     <subfield code="0">00102714X</subfield>
-//   </datafield>
-//   <datafield tag="702" ind1=" " ind2="1">
-//     <subfield code="3">02704324X</subfield>
-//     <subfield code="a">Pappo-Musard</subfield>
-//     <subfield code="b">Catherine</subfield>
-//     <subfield code="4">730</subfield>
-//   </datafield>
-//   <datafield tag="702" ind1=" " ind2="1">
-//     <subfield code="3">028265866</subfield>
-//     <subfield code="a">Nordon</subfield>
-//     <subfield code="b">Pierre</subfield>
-//   </datafield>
-//   <datafield tag="830" ind1=" " ind2=" ">
-//     <subfield code="a">pas un doublon</subfield>
-//   </datafield>
-//   <datafield tag="930" ind1="2" ind2=" ">
-//     <subfield code="5">ETAB1</subfield>
-//     <subfield code="c">Libre-accès</subfield>
-//     <subfield code="a">8 WOO</subfield>
-//   </datafield>
-//   <datafield tag="940" ind1=" " ind2=" ">
-//     <subfield code="5">ETAB2</subfield>
-//     <subfield code="a">20130626</subfield>
-//   </datafield>
-//   <datafield tag="930" ind1=" " ind2=" ">
-//     <subfield code="5">ETAB3</subfield>
-//     <subfield code="j">g</subfield>
-//   </datafield>
-//   <datafield tag="940" ind1=" " ind2=" ">
-//     <subfield code="5">ETAB4</subfield>
-//     <subfield code="a">20110923</subfield>
-//   </datafield>
-// </record>`)
+func TestGetRCRs(t *testing.T) {
+	input := []string{"83", "71", "25"}
+	sc, _ := NewSudocClient(input)
+	sc.getRCRs(input)
+}
 
 // func TestNewRecord(t *testing.T) {
 // 	var tests = [][]byte{nil, errorXML}

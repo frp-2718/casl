@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sudoc service="iln2rcr">
+    <query>
+        <iln>1</iln>
+        <result>
+            <library>
+                <rcr>100000001</rcr>
+                <name>Université 1.1</name>
+                <shortname>UNIV-1.1</shortname>
+                <oclcsymbol>U11</oclcsymbol>
+                <address>adresse</address>
+                <tel>tel</tel>
+                <web>http://univ-1-1.fr/</web>
+                <type>Bibliothèque d&apos;institut ou de département universitaire</type>
+                <latitude>1.1</latitude>
+                <longitude>1.1</longitude>
+            </library>
+        </result>
+    </query>
+    <query>
+        <iln>2</iln>
+        <result>
+            <library>
+                <rcr>200000001</rcr>
+                <name>Université 2.1</name>
+                <shortname>UNIV-2.1</shortname>
+                <oclcsymbol>U21</oclcsymbol>
+                <address>adresse</address>
+                <tel>tel</tel>
+                <web>https://univ-2-1.fr/</web>
+                <type>Bibliothèque d&apos;institut ou de département universitaire</type>
+                <latitude>2.01</latitude>
+                <longitude>2.01</longitude>
+            </library>
+            <library>
+                <rcr>200000002</rcr>
+                <name>Université 2.2</name>
+                <shortname>UNIV-2.2</shortname>
+                <oclcsymbol>U22</oclcsymbol>
+                <address>adresse</address>
+                <tel>tel</tel>
+                <web>https://univ-2-2.fr/</web>
+                <type>Bibliothèque d&apos;institut ou de département universitaire</type>
+                <latitude>2.02</latitude>
+                <longitude>2.02</longitude>
+            </library>
+            <library>
+                <rcr>200000003</rcr>
+                <name>Université 2.3</name>
+                <shortname>UNIV-2.3</shortname>
+                <oclcsymbol>U23</oclcsymbol>
+                <address>adresse</address>
+                <tel>tel</tel>
+                <web>https://univ-2-3.fr/</web>
+                <type>Bibliothèque d&apos;institut ou de département universitaire</type>
+                <latitude>2.03</latitude>
+                <longitude>2.03</longitude>
+            </library>
+        </result>
+    </query>
+</sudoc>
