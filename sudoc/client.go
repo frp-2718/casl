@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net/http"
 	"os"
 	"slices"
 	"strings"
@@ -22,7 +21,7 @@ type SudocClient struct {
 	fetcher requests.Fetcher
 }
 
-// internal representation of a library in SUDOC's sense.
+// Internal representation of a library in SUDOC's sense.
 type library struct {
 	iln  string
 	rcr  string
@@ -35,10 +34,18 @@ const (
 )
 
 // NewSudocClient provides a SUDOC client including RCR->library mappings built
-// from the parameter CSV file.
-func NewSudocClient(ilns []string) (*SudocClient, error) {
+// from the iln2rcr API.
+func NewSudocClient(ilns []string, fetcher requests.Fetcher) (*SudocClient, error) {
+	if ilns == nil || len(ilns) == 0 {
+		return nil, errors.New("NewSudocClient: empty or nil list of ILNs")
+	}
+
 	var client SudocClient
-	client.fetcher = requests.NewHttpFetch(http.DefaultClient)
+	if fetcher == nil {
+		client.fetcher = requests.NewHttpFetch(nil)
+	} else {
+		client.fetcher = fetcher
+	}
 
 	rcrs, err := client.getRCRs(ilns)
 	if err != nil {
