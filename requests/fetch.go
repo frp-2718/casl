@@ -59,6 +59,10 @@ func (f HttpFetcher) Fetch(url string) ([]byte, error) {
 	return data, nil
 }
 
+func (f HttpFetcher) FetchMarc(ppn string) ([]byte, error) {
+	return Fetch(marcxml_url + ppn + ".xml")
+}
+
 // Fetch returns the xml record corresponding to the given URL, or nil if
 // unsucessful
 func Fetch(url string) ([]byte, error) {

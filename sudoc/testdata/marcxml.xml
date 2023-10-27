@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record>
+  <leader>     cam0 22        450 </leader>
+  <controlfield tag="001">155075771</controlfield>
+  <datafield tag="010" ind1="#" ind2="#">
+    <subfield code="a">978-2-253-02983-0</subfield>
+    <subfield code="b">br.</subfield>
+    <subfield code="d">6 EUR</subfield>
+  </datafield>
+  <datafield tag="034" ind1=" " ind2=" ">
+    <subfield code="a">OCoLC</subfield>
+    <subfield code="0">800929156</subfield>
+  </datafield>
+  <datafield tag="035" ind1="#" ind2="#">
+    <subfield code="1">24</subfield>
+    <subfield code="a">655706</subfield>
+  </datafield>
+  <datafield tag="035" ind1="#" ind2="#">
+    <subfield code="1">85</subfield>
+    <subfield code="a">290206</subfield>
+  </datafield>
+  <datafield tag="073" ind1="#" ind2="1">
+    <subfield code="a">9782253029830</subfield>
+  </datafield>
+  <datafield tag="100" ind1="#" ind2="#">
+    <subfield code="a">20110923d1982    m  y0frey50      ba</subfield>
+  </datafield>
+  <datafield tag="101" ind1="1" ind2="#">
+    <subfield code="a">fre</subfield>
+    <subfield code="c">eng</subfield>
+    <subfield code="2">639-2</subfield>
+  </datafield>
+  <datafield tag="102" ind1="#" ind2="#">
+    <subfield code="a">FR</subfield>
+  </datafield>
+  <datafield tag="104" ind1="#" ind2="#">
+    <subfield code="a">m</subfield>
+    <subfield code="b">y</subfield>
+    <subfield code="c">y</subfield>
+    <subfield code="d">ba</subfield>
+    <subfield code="e">0</subfield>
+    <subfield code="f">fre</subfield>
+  </datafield>
+  <datafield tag="105" ind1="#" ind2="#">
+    <subfield code="a">y   a   000ay</subfield>
+  </datafield>
+  <datafield tag="106" ind1="#" ind2="#">
+    <subfield code="a">r</subfield>
+  </datafield>
+  <datafield tag="181" ind1="#" ind2="#">
+    <subfield code="6">z01</subfield>
+    <subfield code="c">txt</subfield>
+    <subfield code="2">rdacontent</subfield>
+  </datafield>
+  <datafield tag="181" ind1="#" ind2="1">
+    <subfield code="6">z01</subfield>
+    <subfield code="a">i#</subfield>
+    <subfield code="b">xxxe##</subfield>
+  </datafield>
+  <datafield tag="182" ind1="#" ind2="#">
+    <subfield code="6">z01</subfield>
+    <subfield code="c">n</subfield>
+    <subfield code="2">rdamedia</subfield>
+  </datafield>
+  <datafield tag="182" ind1="#" ind2="1">
+    <subfield code="6">z01</subfield>
+    <subfield code="a">n</subfield>
+  </datafield>
+  <datafield tag="183" ind1="#" ind2="#">
+    <subfield code="6">z01</subfield>
+    <subfield code="a">nga</subfield>
+    <subfield code="2">RDAfrCarrier</subfield>
+  </datafield>
+  <datafield tag="200" ind1="1" ind2="#">
+    <subfield code="a">Orlando</subfield>
+    <subfield code="f">Virginia Woolf</subfield>
+    <subfield code="g">traduction de Catherine Pappo-Musard</subfield>
+    <subfield code="g">préface et notes de Pierre Nordon</subfield>
+  </datafield>
+  <datafield tag="205" ind1="#" ind2="#">
+    <subfield code="a">[Nouvelle édition]</subfield>
+  </datafield>
+  <datafield tag="214" ind1="#" ind2="0">
+    <subfield code="a">Paris</subfield>
+    <subfield code="c">LGF</subfield>
+    <subfield code="d">DL 1982</subfield>
+  </datafield>
+  <datafield tag="215" ind1="#" ind2="#">
+    <subfield code="a">1 vol. (317 p.)</subfield>
+    <subfield code="c">couv. ill. en coul.</subfield>
+    <subfield code="d">17 cm</subfield>
+  </datafield>
+  <datafield tag="225" ind1="0" ind2="#">
+    <subfield code="a">Le Livre de poche</subfield>
+    <subfield code="i">Biblio</subfield>
+    <subfield code="v">3002</subfield>
+  </datafield>
+  <datafield tag="305" ind1="#" ind2="#">
+    <subfield code="a">Autres tirages : 2011, 2012, 2014, 2016, 2021</subfield>
+  </datafield>
+  <datafield tag="320" ind1="#" ind2="#">
+    <subfield code="a">Notes bibliogr.</subfield>
+  </datafield>
+  <datafield tag="410" ind1="#" ind2="#">
+    <subfield code="0">00102714X</subfield>
+    <subfield code="t">Le Livre de poche. Biblio</subfield>
+    <subfield code="x">0752-0387</subfield>
+    <subfield code="v">3002</subfield>
+  </datafield>
+  <datafield tag="454" ind1="#" ind2="#">
+    <subfield code="t">Orlando</subfield>
+  </datafield>
+  <datafield tag="579" ind1=" " ind2=" ">
+    <subfield code="1">0499</subfield>
+    <subfield code="3">218645880</subfield>
+    <subfield code="t">Orlando</subfield>
+  </datafield>
+  <datafield tag="676" ind1="#" ind2="#">
+    <subfield code="a">823</subfield>
+    <subfield code="v">22</subfield>
+    <subfield code="z">fre</subfield>
+  </datafield>
+  <datafield tag="700" ind1="#" ind2="1">
+    <subfield code="3">027199746</subfield>
+    <subfield code="a">Woolf</subfield>
+    <subfield code="b">Virginia</subfield>
+    <subfield code="f">1882-1941</subfield>
+    <subfield code="4">070</subfield>
+  </datafield>
+  <datafield tag="701" ind1="#" ind2="1">
+    <subfield code="3">02704324X</subfield>
+    <subfield code="a">Pappo-Musard</subfield>
+    <subfield code="b">Catherine</subfield>
+    <subfield code="4">730</subfield>
+  </datafield>
+  <datafield tag="701" ind1="#" ind2="1">
+    <subfield code="3">028265866</subfield>
+    <subfield code="a">Nordon</subfield>
+    <subfield code="b">Pierre</subfield>
+    <subfield code="f">1927-....</subfield>
+    <subfield code="4">080</subfield>
+  </datafield>
+  <datafield tag="801" ind1="#" ind2="3">
+    <subfield code="a">FR</subfield>
+    <subfield code="b">Abes</subfield>
+    <subfield code="c">20220628</subfield>
+    <subfield code="g">AFNOR</subfield>
+  </datafield>
+  <datafield tag="830" ind1="#" ind2="#">
+    <subfield code="a">N&apos;est pas un doublon du PPN 000536113. L&apos;ISBN est identique mais le traducteur et le préfacier sont différents [ILN 024-B2UFR, 2011-09-23]</subfield>
+  </datafield>
+  <datafield tag="915" ind1="#" ind2="#">
+    <subfield code="5">RCR1:EX1</subfield>
+    <subfield code="b">000000000</subfield>
+  </datafield>
+  <datafield tag="930" ind1="#" ind2="#">
+    <subfield code="5">RCR1:EX1</subfield>
+    <subfield code="b">RCR1</subfield>
+    <subfield code="c">SUB1</subfield>
+    <subfield code="a">823.9 WOO</subfield>
+    <subfield code="j">u</subfield>
+  </datafield>
+  <datafield tag="940" ind1=" " ind2=" ">
+    <subfield code="5">RCR1:EX1</subfield>
+    <subfield code="a">000000000</subfield>
+    <subfield code="b">x</subfield>
+  </datafield>
+  <datafield tag="941" ind1=" " ind2=" ">
+    <subfield code="5">RCR1:EX1</subfield>
+    <subfield code="a">000000000</subfield>
+    <subfield code="b">16:14:15.000</subfield>
+  </datafield>
+  <datafield tag="992" ind1="#" ind2="#">
+    <subfield code="5">RCR1:EX1</subfield>
+    <subfield code="a">823.9</subfield>
+    <subfield code="2">cdd</subfield>
+  </datafield>
+  <datafield tag="930" ind1="#" ind2="#">
+    <subfield code="5">RCR2:EX2</subfield>
+    <subfield code="b">RCR2</subfield>
+    <subfield code="j">g</subfield>
+  </datafield>
+  <datafield tag="940" ind1=" " ind2=" ">
+    <subfield code="5">RCR2:EX2</subfield>
+    <subfield code="a">000000000</subfield>
+    <subfield code="b">x</subfield>
+  </datafield>
+  <datafield tag="941" ind1=" " ind2=" ">
+    <subfield code="5">RCR2:EX2</subfield>
+    <subfield code="a">000000000</subfield>
+    <subfield code="b">12:07:13.000</subfield>
+  </datafield>
+  <datafield tag="930" ind1="#" ind2="#">
+    <subfield code="5">RCR2:EX3</subfield>
+    <subfield code="b">RCR2</subfield>
+    <subfield code="j">g</subfield>
+  </datafield>
+  <datafield tag="940" ind1=" " ind2=" ">
+    <subfield code="5">RCR2:EX3</subfield>
+    <subfield code="a">000000000</subfield>
+    <subfield code="b">x</subfield>
+  </datafield>
+  <datafield tag="941" ind1=" " ind2=" ">
+    <subfield code="5">RCR2:EX3</subfield>
+    <subfield code="a">000000000</subfield>
+    <subfield code="b">12:19:46.000</subfield>
+  </datafield>
+  <datafield tag="930" ind1="#" ind2="#">
+    <subfield code="5">RCR3:EX4</subfield>
+    <subfield code="b">RCR3</subfield>
+    <subfield code="j">u</subfield>
+  </datafield>
+  <datafield tag="940" ind1=" " ind2=" ">
+    <subfield code="5">RCR3:EX4</subfield>
+    <subfield code="a">000000000</subfield>
+    <subfield code="b">x</subfield>
+  </datafield>
+  <datafield tag="941" ind1=" " ind2=" ">
+    <subfield code="5">RCR3:EX4</subfield>
+    <subfield code="a">000000000</subfield>
+    <subfield code="b">15:39:49.000</subfield>
+  </datafield>
+</record>

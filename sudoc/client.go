@@ -39,13 +39,12 @@ func NewSudocClient(ilns []string, fetcher requests.Fetcher) (*SudocClient, erro
 	if ilns == nil || len(ilns) == 0 {
 		return nil, errors.New("NewSudocClient: empty or nil list of ILNs")
 	}
+	if fetcher == nil {
+		return nil, errors.New("NewSudocClient: no HTTP client provided")
+	}
 
 	var client SudocClient
-	if fetcher == nil {
-		client.fetcher = requests.NewHttpFetch(nil)
-	} else {
-		client.fetcher = fetcher
-	}
+	client.fetcher = fetcher
 
 	rcrs, err := client.getRCRs(ilns)
 	if err != nil {
@@ -59,8 +58,8 @@ func NewSudocClient(ilns []string, fetcher requests.Fetcher) (*SudocClient, erro
 // from the unimarc2marcxml API. Only the locations regarding the RCRs of
 // interest, given as a second argument, are provided.
 func (sc *SudocClient) GetFilteredLocations(ppn string, rcrs []string) ([]*entities.SudocLocation, error) {
-	locations, err := sc.GetLocations(ppn)
 	var filtered []*entities.SudocLocation
+	locations, err := sc.GetLocations(ppn)
 	if err != nil {
 		return filtered, err
 	}
@@ -81,7 +80,7 @@ func (sc *SudocClient) GetFilteredLocations(ppn string, rcrs []string) ([]*entit
 func (sc *SudocClient) GetLocations(ppn string) ([]*entities.SudocLocation, error) {
 	var locs []*entities.SudocLocation
 	sc.stats += 1
-	data, err := requests.FetchMarc(ppn)
+	data, err := sc.fetcher.Fetch(DEFAULT_BASE_URL + ppn + ".xml")
 	if err != nil {
 		return locs, fmt.Errorf("ppn %s: %w\n", ppn, err)
 	}
