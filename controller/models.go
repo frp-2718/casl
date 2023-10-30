@@ -9,7 +9,7 @@ import (
 type suClient interface {
 	GetLocations(ppn string) ([]*entities.SudocLocation, error)
 	GetFilteredLocations(ppn string, rcrs []string) ([]*entities.SudocLocation, error)
-	Stats() string
+	Stats(t string) int
 }
 
 type almaClient interface {

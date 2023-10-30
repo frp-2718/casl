@@ -29,7 +29,7 @@ type HttpFetcher struct {
 
 func NewHttpFetch(client *http.Client) Fetcher {
 	var fetcher HttpFetcher
-	if client == http.DefaultClient {
+	if client == nil {
 		fetcher.client = &http.Client{Timeout: 5 * time.Second}
 	} else {
 		fetcher.client = client

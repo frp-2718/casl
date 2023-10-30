@@ -3,12 +3,16 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"os"
+	"regexp"
 	"time"
 
 	"casl/controller"
+	"casl/entities"
+	"casl/requests"
 )
 
 func main() {
@@ -19,68 +23,68 @@ func main() {
 
 	start := time.Now()
 
-	ctrl, err := controller.NewController("config.json")
+	fetcher := requests.NewHttpFetch(nil)
+	ctrl, err := controller.NewController("config.json", fetcher)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(ctrl.SUClient)
 
-	// // PPNs to check.
-	// ppns := make(map[string]bool)
-	// var records []entities.BibRecord
-	// var ppnPattern = regexp.MustCompile(`[0-9]{8}([0-9]|(x|X))`)
+	// PPNs to check.
+	ppns := make(map[string]bool)
+	var records []entities.BibRecord
+	var ppnPattern = regexp.MustCompile(`[0-9]{8}([0-9]|(x|X))`)
 
-	// for _, filename := range os.Args[1:] {
-	// 	f, err := os.Open(filename)
-	// 	if err != nil {
-	// 		log.Fatal(err)
-	// 	}
-	// 	defer f.Close()
-	// 	scanner := bufio.NewScanner(f)
+	for _, filename := range os.Args[1:] {
+		f, err := os.Open(filename)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer f.Close()
+		scanner := bufio.NewScanner(f)
 
-	// 	// Discard invalid ppns.
-	// 	for scanner.Scan() {
-	// 		if line := scanner.Text(); ppnPattern.Match([]byte(line)) {
-	// 			ppns[line] = true
-	// 			records = append(records, entities.BibRecord{PPN: line})
-	// 		} else {
-	// 			log.Printf("invalid PPN: %s", line)
-	// 		}
-	// 	}
-	// 	if err := scanner.Err(); err != nil {
-	// 		log.Fatal(err)
-	// 	}
-	// }
+		// Discard invalid ppns.
+		for scanner.Scan() {
+			if line := scanner.Text(); ppnPattern.Match([]byte(line)) {
+				ppns[line] = true
+				records = append(records, entities.BibRecord{PPN: line})
+			} else {
+				log.Printf("invalid PPN: %s", line)
+			}
+		}
+		if err := scanner.Err(); err != nil {
+			log.Fatal(err)
+		}
+	}
 
-	// fmt.Printf("%d PPN à vérifier...\n", len(ppns))
+	fmt.Printf("%d PPN à vérifier...\n", len(ppns))
 
-	// var results []entities.BibRecord
-	// for _, record := range records {
-	// 	sudoc, err := ctrl.SUClient.GetFilteredLocations(record.PPN, ctrl.Config.FollowedRCR)
-	// 	if err != nil {
-	// 		log.Println(err)
-	// 		continue
-	// 	}
-	// 	if len(sudoc) > 0 {
-	// 		record.SudocLocations = sudoc
-	// 	}
-	// 	alma, err := ctrl.AlmaClient.GetFilteredLocations(record.PPN, ctrl.Config.FolowedLibs)
-	// 	if err != nil {
-	// 		log.Println(err)
-	// 		continue
-	// 	}
-	// 	if len(alma) > 0 {
-	// 		record.AlmaLocations = alma
-	// 	}
-	// 	results = append(results, record)
-	// }
+	var results []entities.BibRecord
+	for _, record := range records {
+		sudoc, err := ctrl.SUClient.GetFilteredLocations(record.PPN, ctrl.Config.FollowedRCR)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		if len(sudoc) > 0 {
+			record.SudocLocations = sudoc
+		}
+		alma, err := ctrl.AlmaClient.GetFilteredLocations(record.PPN, ctrl.Config.FolowedLibs)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		if len(alma) > 0 {
+			record.AlmaLocations = alma
+		}
+		results = append(results, record)
+	}
 
-	// var sums []controller.Summary
-	// for _, res := range results {
-	// 	sums = append(sums, ctrl.Compare(&res)...)
-	// }
+	var sums []controller.Summary
+	for _, res := range results {
+		sums = append(sums, ctrl.Compare(&res)...)
+	}
 
-	// ctrl.WriteCSV(sums)
+	ctrl.WriteCSV(sums)
 
 	elapsed := time.Since(start)
 	fmt.Printf("Elapsed time: %s\n", elapsed)
@@ -89,5 +93,7 @@ func main() {
 	fmt.Println("ALMA STATS")
 	fmt.Println(ctrl.AlmaClient.Stats())
 	fmt.Println("SUDOC STATS")
-	fmt.Println(ctrl.SUClient.Stats())
+	fmt.Printf("iln2rcr: %d\n", ctrl.SUClient.Stats("iln2rcr"))
+	fmt.Printf("marcxml: %d\n", ctrl.SUClient.Stats("marcxml"))
+	fmt.Printf("total: %d\n", ctrl.SUClient.Stats("total"))
 }

@@ -3,6 +3,7 @@ package controller
 import (
 	"casl/entities"
 	"casl/exl"
+	"casl/requests"
 	"casl/sudoc"
 	"encoding/csv"
 	"encoding/json"
@@ -14,7 +15,7 @@ import (
 	"time"
 )
 
-func NewController(configFile string) (Controller, error) {
+func NewController(configFile string, fetcher requests.Fetcher) (Controller, error) {
 	var ctrl Controller
 
 	ctrl.loadConfig(configFile)
@@ -22,7 +23,7 @@ func NewController(configFile string) (Controller, error) {
 	ctrl.getRCRs()
 	ctrl.getLibs()
 
-	suclient, err := sudoc.NewSudocClient(ctrl.Config.ILNs)
+	suclient, err := sudoc.NewSudocClient(ctrl.Config.ILNs, fetcher)
 	if err != nil {
 		return ctrl, err
 	}
