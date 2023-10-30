@@ -30,6 +30,7 @@ func decodeRCR(data []byte) (map[string]library, error) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	// iln not found
 	if len(result.Queries) == 0 {
 		return nil, errors.New("null xml")
 	}

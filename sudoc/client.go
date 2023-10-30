@@ -4,12 +4,8 @@ import (
 	"casl/entities"
 	"casl/marc"
 	"casl/requests"
-	"encoding/csv"
 	"errors"
 	"fmt"
-	"io"
-	"log"
-	"os"
 	"slices"
 	"strings"
 )
@@ -17,7 +13,7 @@ import (
 // SudocClient represents the main object to interact with.
 type SudocClient struct {
 	rcrs    map[string]library
-	stats   int
+	stats   stats
 	fetcher requests.Fetcher
 }
 
@@ -26,6 +22,11 @@ type library struct {
 	iln  string
 	rcr  string
 	name string
+}
+
+type stats struct {
+	iln2rcr int
+	marcxml int
 }
 
 const (
@@ -66,8 +67,6 @@ func (sc *SudocClient) GetFilteredLocations(ppn string, rcrs []string) ([]*entit
 
 	for _, location := range locations {
 		if slices.Contains(rcrs, location.RCR) {
-			location.ILN = sc.rcrs[location.RCR].iln
-			location.Name = sc.rcrs[location.RCR].name
 			filtered = append(filtered, location)
 		}
 	}
@@ -75,11 +74,10 @@ func (sc *SudocClient) GetFilteredLocations(ppn string, rcrs []string) ([]*entit
 }
 
 // GetLocations gets all the SUDOC locations of a given PPN, from the
-// unimarc2marcxml API.
-// TODO: abstract the requester
+// unimarc2marcxml API, filled with data from client's RCR mappings.
 func (sc *SudocClient) GetLocations(ppn string) ([]*entities.SudocLocation, error) {
 	var locs []*entities.SudocLocation
-	sc.stats += 1
+	sc.stats.marcxml += 1
 	data, err := sc.fetcher.Fetch(DEFAULT_BASE_URL + ppn + ".xml")
 	if err != nil {
 		return locs, fmt.Errorf("ppn %s: %w\n", ppn, err)
@@ -106,44 +104,34 @@ func (sc *SudocClient) GetLocations(ppn string) ([]*entities.SudocLocation, erro
 			location.Sublocation = sublocation[0]
 		}
 
+		// Add informations from the RCR mappings
+		location.ILN = sc.rcrs[location.RCR].iln
+		location.Name = sc.rcrs[location.RCR].name
 		locs = append(locs, &location)
 	}
 	return locs, nil
 }
 
-func (sc *SudocClient) Stats() string {
-	return fmt.Sprintf("unimarc2marcxml: %d\n", sc.stats)
+// Stats returns numbers of requests made by the client to the service named
+// by the argument ("iln2rcr", "marcxml", "total").
+// TODO: provide a better way to select the stat than by string
+func (sc *SudocClient) Stats(t string) int {
+	switch t {
+	case "iln2rcr":
+		return sc.stats.iln2rcr
+	case "marcxml":
+		return sc.stats.marcxml
+	case "total":
+		return sc.stats.iln2rcr + sc.stats.marcxml
+	default:
+		return sc.Stats("total")
+	}
 }
 
-func (sc *SudocClient) buildRCRs(csv_file string) error {
-	f, err := os.Open(csv_file)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	sc.rcrs = make(map[string]library)
-
-	r := csv.NewReader(f)
-	for {
-		record, err := r.Read()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			log.Fatal(err)
-		}
-		lib := library{}
-		lib.iln = record[3]
-		lib.rcr = record[2]
-		lib.name = record[4]
-		sc.rcrs[lib.rcr] = lib
-	}
-	return nil
-}
-
+// getRCRs builds the map RCR->Library from the iln2rcr service.
 func (sc *SudocClient) getRCRs(rcrs []string) (map[string]library, error) {
 	url := ILN2RCR_URL + strings.Join(rcrs, ",")
+	sc.stats.iln2rcr += 1
 	data, err := sc.fetcher.Fetch(url)
 	if err != nil {
 		return nil, fmt.Errorf("getRCRs: iln2rcr failed: %w", err)

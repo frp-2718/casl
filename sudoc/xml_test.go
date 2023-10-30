@@ -11,7 +11,7 @@ func TestDecodeRCR(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	data_error, err := os.ReadFile("testdata/iln2rcr_notfound.xml")
+	data_error, err := os.ReadFile("testdata/iln2rcr_not_found.xml")
 	if err != nil {
 		t.Fatal(err)
 	}
