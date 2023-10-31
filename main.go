@@ -59,7 +59,8 @@ func main() {
 	fmt.Printf("%d PPN à vérifier...\n", len(ppns))
 
 	var results []entities.BibRecord
-	for _, record := range records {
+	for i, record := range records {
+		fmt.Printf("ppn %d/%d...\n", i, len(records))
 		sudoc, err := ctrl.SUClient.GetFilteredLocations(record.PPN, ctrl.Config.FollowedRCR)
 		if err != nil {
 			log.Println(err)

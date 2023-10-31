@@ -61,10 +61,10 @@ func (a *AlmaClient) GetMMSfromPPN(ppn string) ([]string, error) {
 	}
 	result := []string{}
 	for _, bib := range bibs.Bibs {
-		// if ppnMatch(bib.Network_numbers, ppn) {
-		// 	result = append(result, bib.MMS_id)
-		// }
-		result = append(result, bib.MMS_id)
+		if ppnMatch(bib.Network_numbers, ppn) {
+			result = append(result, bib.MMS_id)
+		}
+		// result = append(result, bib.MMS_id)
 	}
 	return result, nil
 }
@@ -155,7 +155,7 @@ func (a *AlmaClient) GetLocations(ppn string) ([]*entities.AlmaLocation, error) 
 	if len(mms) == 0 {
 		return res, fmt.Errorf("GetAlmaLocation: PPN %s not found", ppn)
 	}
-	// TODO: manage the multi-MMS case
+	// TODO: handle the multi-MMS case
 	items, err := a.GetItems(mms[0])
 	items_by_mms := make(map[string][]Item)
 	for _, item := range items {
@@ -200,7 +200,7 @@ func (a *AlmaClient) buildURL(urlType int, id string) string {
 
 func ppnMatch(ids []string, ppn string) bool {
 	for _, id := range ids {
-		if id == "(PPN)"+string(ppn) {
+		if id == ppn {
 			return true
 		}
 	}
