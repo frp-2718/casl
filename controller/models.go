@@ -15,7 +15,7 @@ type suClient interface {
 type almaClient interface {
 	GetLocations(ppn string) ([]*entities.AlmaLocation, error)
 	GetFilteredLocations(ppn string, lib_codes []string) ([]*entities.AlmaLocation, error)
-	Stats() string
+	Stats(t string) int
 }
 
 type Controller struct {

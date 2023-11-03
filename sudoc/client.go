@@ -1,3 +1,4 @@
+// Package sudoc provides a client for the ABES API.
 package sudoc
 
 import (

@@ -92,7 +92,10 @@ func main() {
 
 	fmt.Println()
 	fmt.Println("ALMA STATS")
-	fmt.Println(ctrl.AlmaClient.Stats())
+	fmt.Printf("bibs: %d\n", ctrl.AlmaClient.Stats("bibs"))
+	fmt.Printf("items: %d\n", ctrl.AlmaClient.Stats("items"))
+	fmt.Printf("total: %d\n", ctrl.AlmaClient.Stats("total"))
+	fmt.Println()
 	fmt.Println("SUDOC STATS")
 	fmt.Printf("iln2rcr: %d\n", ctrl.SUClient.Stats("iln2rcr"))
 	fmt.Printf("marcxml: %d\n", ctrl.SUClient.Stats("marcxml"))
