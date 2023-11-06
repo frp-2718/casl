@@ -17,6 +17,7 @@ type AlmaClient struct {
 	apiKey  string
 	baseURL string
 	stats   stats
+	fetcher requests.Fetcher
 }
 
 type stats struct {
@@ -33,16 +34,25 @@ const (
 
 // NewAlmaClient creates an Alma client with the default http client if none
 // is provided.
-func NewAlmaClient(apiKey, baseURL string) *AlmaClient {
+func NewAlmaClient(apiKey, baseURL string, fetcher requests.Fetcher) (*AlmaClient, error) {
 	alma := new(AlmaClient)
+	if apiKey == "" {
+		return nil, errors.New("NewAlmaClient: no API key provided")
+	}
 	alma.apiKey = apiKey
 	if baseURL == "" {
 		alma.baseURL = almawsURL
 	} else {
 		alma.baseURL = baseURL
 	}
+
+	if fetcher == nil {
+		return nil, errors.New("NewAlmaClient: no HTTP client provided")
+	}
+	alma.fetcher = fetcher
+
 	alma.stats = stats{}
-	return alma
+	return alma, nil
 }
 
 // GetFilteredLocations gets Alma locations of a given PPN, properly filled,
@@ -108,7 +118,7 @@ func (a *AlmaClient) GetLocations(ppn string) ([]*entities.AlmaLocation, error) 
 // NotFoundError.
 func (a *AlmaClient) getMMSfromPPN(ppn string) ([]string, error) {
 	a.stats.bibs_req += 1
-	data, err := requests.Fetch(a.buildURL(bibs_t, "(PPN)"+ppn))
+	data, err := a.fetcher.Fetch(a.buildURL(bibs_t, "(PPN)"+ppn))
 	if err != nil { // HTTP errors, including NotFoundError
 		log.Printf("alma: getMMSfromPPN: %v", err)
 		return nil, err

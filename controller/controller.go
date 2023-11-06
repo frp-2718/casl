@@ -28,7 +28,10 @@ func NewController(configFile string, fetcher requests.Fetcher) (Controller, err
 		return ctrl, err
 	}
 	ctrl.SUClient = suclient
-	ctrl.AlmaClient = exl.NewAlmaClient(ctrl.Config.AlmaAPIKey, "")
+	ctrl.AlmaClient, err = exl.NewAlmaClient(ctrl.Config.AlmaAPIKey, "", fetcher)
+	if err != nil {
+		return ctrl, err
+	}
 
 	return ctrl, nil
 }
