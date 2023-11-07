@@ -2,6 +2,7 @@ package exl
 
 import (
 	"casl/requests"
+	"encoding/xml"
 	"os"
 	"reflect"
 	"testing"
@@ -9,34 +10,36 @@ import (
 
 type mockHttpFetcher struct{}
 
+const url_bibs = "bibs?view=brief&expand=None&other_system_id=(PPN)"
+
 func (m mockHttpFetcher) Fetch(url string) ([]byte, error) {
 	switch url {
-	case almawsURL + "bibs?view=brief&expand=None&other_system_id=(PPN)" + "ppn_3_mms" + "&apikey=key":
+	case almawsURL + url_bibs + "ppn_3_mms" + "&apikey=key":
 		data, err := os.ReadFile("testdata/ppn_3_mms.xml")
 		if err != nil {
 			return nil, err
 		}
 		return data, nil
-	case almawsURL + "bibs?view=brief&expand=None&other_system_id=(PPN)" + "ppn_2_mms" + "&apikey=key":
-		data, err := os.ReadFile("testdata/ppn_2_mms.xml")
-		if err != nil {
-			return nil, err
-		}
-		return data, nil
-	case almawsURL + "bibs?view=brief&expand=None&other_system_id=(PPN)" + "ppn_1_mms" + "&apikey=key":
+	case almawsURL + url_bibs + "ppn_1_mms" + "&apikey=key":
 		data, err := os.ReadFile("testdata/ppn_1_mms.xml")
 		if err != nil {
 			return nil, err
 		}
 		return data, nil
-	case almawsURL + "bibs?view=brief&expand=None&other_system_id=(PPN)" + "ppn_0_mms" + "&apikey=key":
+	case almawsURL + url_bibs + "ppn_0_mms" + "&apikey=key":
 		data, err := os.ReadFile("testdata/ppn_0_mms.xml")
 		if err != nil {
 			return nil, err
 		}
 		return data, nil
-	case "not_found":
-		data, err := os.ReadFile("testdata/iln2rcr_not_found.xml")
+	case almawsURL + url_bibs + "ppn_00_mms" + "&apikey=key":
+		data, err := os.ReadFile("testdata/ppn_0_mms.xml")
+		if err != nil {
+			return nil, err
+		}
+		return data, nil
+	case almawsURL + "bibs/" + "mms_items" + "/holdings/ALL/items?limit=100&apikey=key":
+		data, err := os.ReadFile("testdata/mms_items.xml")
 		if err != nil {
 			return nil, err
 		}
@@ -106,7 +109,9 @@ func TestGetMMSFromPPN(t *testing.T) {
 		want  []string
 	}{
 		{"3 MMS", "ppn_3_mms", []string{"mms1", "mms2", "mms3"}},
-		// {"2 MMS", "ppn_2_mms", []string{"mms1", "mms3"}},
+		{"1 MMS", "ppn_1_mms", []string{"mms2"}},
+		{"0 MMS", "ppn_0_mms", []string{}},
+		{"0 MMS", "ppn_00_mms", []string{}},
 	}
 
 	for _, test := range tests {
@@ -122,24 +127,36 @@ func TestGetMMSFromPPN(t *testing.T) {
 	}
 }
 
-// func (a *AlmaClient) getMMSfromPPN(ppn string) ([]string, error) {
-//func TestGetMMSfromPPN(t *testing.T) {
-//	alma, _ := New(nil, "apikey", almawsURL)
-//	alma.fetchClient = &mockFetcher{}
-//	var tests = []struct {
-//		ppn      PPN
-//		expected []MMS
-//	}{
-//		{"nonexistent", nil},
-//		{"bibsCount1", []MMS{"mms1"}},
-//		{"bibsCount2", []MMS{"mms2"}},
-//		{"bibsCount3", []MMS{"mms1", "mms3"}},
-//		{"bibsCount1noMMS", []MMS{}},
-//	}
-//	for _, test := range tests {
-//		got, _ := alma.GetMMSfromPPN(test.ppn)
-//		if !equalMMSslices(got, test.expected) {
-//			t.Errorf("%s returned %v, expected %v", test.ppn, got, test.expected)
-//		}
-//	}
-//}
+func TestGetItems(t *testing.T) {
+	var name xml.Name
+	items := []Item{
+		{
+			name,
+			Holding{false, "mms_1", "CN_1"},
+			ItemData{
+				Status{"Item in place", "1"},
+				Process{"", ""},
+				Library{"Bibliothèque 1", "BIB_1"},
+				Location{"Location 1", "LOC_1"},
+			},
+		},
+		{
+			name,
+			Holding{false, "mms_2", "CN_2"},
+			ItemData{
+				Status{"Item in place", "1"},
+				Process{"", ""},
+				Library{"Bibliothèque 2", "BIB_2"},
+				Location{"Location 2", "LOC_2"},
+			},
+		},
+	}
+	client, _ := NewAlmaClient("key", "", mockHttpFetcher{})
+	res, err := client.getItems("mms_1")
+	if err != nil {
+		t.Errorf("got %v", err)
+	}
+	if !reflect.DeepEqual(res, items) {
+		t.Error()
+	}
+}

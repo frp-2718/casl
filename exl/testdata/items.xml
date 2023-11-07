@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<items total_record_count="2">
+    <item link="item">
+        <bib_data link="bib">
+            <mms_id>mms_1</mms_id>
+            <bib_suppress_from_publishing>false</bib_suppress_from_publishing>
+            <title>Eléments de mathématique . Algèbre commutative . Chapitre 10</title>
+            <author>Bourbaki , Nicolas</author>
+            <isbn>978-3-540-34394-3</isbn>
+            <complete_edition>[Réimpression de l'édition de 1998]</complete_edition>
+            <network_numbers>
+                <network_number>112107419</network_number>
+                <network_number>(PPN)112107419</network_number>
+            </network_numbers>
+            <place_of_publication>Berlin</place_of_publication>
+            <date_of_publication>cop. 2007</date_of_publication>
+            <publisher_const>Springer</publisher_const>
+        </bib_data>
+        <holding_data link="holding">
+            <holding_id>holding_1</holding_id>
+            <holding_suppress_from_publishing>false</holding_suppress_from_publishing>
+            <calculated_suppress_from_publishing>false</calculated_suppress_from_publishing>
+            <permanent_call_number_type desc="Other scheme">8</permanent_call_number_type>
+            <permanent_call_number>CN_2</permanent_call_number>
+            <call_number_type desc="Other scheme">8</call_number_type>
+            <call_number>BOUR</call_number>
+            <accession_number/>
+            <copy_id/>
+            <in_temp_location>false</in_temp_location>
+            <temp_library/>
+            <temp_location/>
+            <temp_call_number_type/>
+            <temp_call_number/>
+            <temp_call_number_source/>
+            <temp_policy/>
+        </holding_data>
+        <item_data>
+            <pid>pid</pid>
+            <barcode>code0001</barcode>
+            <creation_date>2009-12-01Z</creation_date>
+            <modification_date>2009-12-01Z</modification_date>
+            <base_status desc="Item in place">1</base_status>
+            <awaiting_reshelving>false</awaiting_reshelving>
+            <physical_material_type desc="Livre">BOOK</physical_material_type>
+            <policy/>
+            <provenance>BS</provenance>
+            <po_line/>
+            <is_magnetic>false</is_magnetic>
+            <arrival_date>2009-12-01Z</arrival_date>
+            <year_of_issue/>
+            <enumeration_a/>
+            <enumeration_b/>
+            <enumeration_c/>
+            <enumeration_d/>
+            <enumeration_e/>
+            <enumeration_f/>
+            <enumeration_g/>
+            <enumeration_h/>
+            <chronology_i/>
+            <chronology_j/>
+            <chronology_k/>
+            <chronology_l/>
+            <chronology_m/>
+            <break_indicator/>
+            <pattern_type/>
+            <linking_number/>
+            <type_of_unit/>
+            <description/>
+            <receiving_operator>import</receiving_operator>
+            <process_type/>
+            <inventory_number/>
+            <inventory_price/>
+            <library desc="Bibliothèque 1">BIB_1</library>
+            <location desc="Location 1">LOC_1</location>
+            <alternative_call_number/>
+            <alternative_call_number_type/>
+            <storage_location_id/>
+            <pages/>
+            <pieces/>
+            <public_note/>
+            <fulfillment_note/>
+            <internal_note_1>Status: d - Disponible</internal_note_1>
+            <internal_note_2/>
+            <internal_note_3/>
+            <statistics_note_1/>
+            <statistics_note_2/>
+            <statistics_note_3/>
+            <requested>false</requested>
+            <physical_condition/>
+            <committed_to_retain/>
+            <retention_reason/>
+            <retention_note/>
+        </item_data>
+    </item>
+    <item link="item">
+        <bib_data link="bib">
+            <mms_id>mms_1</mms_id>
+            <bib_suppress_from_publishing>false</bib_suppress_from_publishing>
+            <title>Eléments de mathématique . Algèbre commutative . Chapitre 10</title>
+            <author>Bourbaki , Nicolas</author>
+            <isbn>978-3-540-34394-3</isbn>
+            <complete_edition>[Réimpression de l'édition de 1998]</complete_edition>
+            <network_numbers>
+                <network_number>112107419</network_number>
+                <network_number>(PPN)112107419</network_number>
+            </network_numbers>
+            <place_of_publication>Berlin</place_of_publication>
+            <date_of_publication>cop. 2007</date_of_publication>
+            <publisher_const>Springer</publisher_const>
+        </bib_data>
+        <holding_data link="holding">
+            <holding_id>holding</holding_id>
+            <holding_suppress_from_publishing>false</holding_suppress_from_publishing>
+            <calculated_suppress_from_publishing>false</calculated_suppress_from_publishing>
+            <permanent_call_number_type desc="Dewey Decimal classification">1</permanent_call_number_type>
+            <permanent_call_number>CN_1</permanent_call_number>
+            <call_number_type desc="Dewey Decimal classification">1</call_number_type>
+            <call_number>510 BOU</call_number>
+            <accession_number/>
+            <copy_id/>
+            <in_temp_location>false</in_temp_location>
+            <temp_library/>
+            <temp_location/>
+            <temp_call_number_type/>
+            <temp_call_number/>
+            <temp_call_number_source/>
+            <temp_policy/>
+        </holding_data>
+        <item_data>
+            <pid>item</pid>
+            <barcode>code0002</barcode>
+            <creation_date>2007-01-26Z</creation_date>
+            <modification_date>2012-10-17Z</modification_date>
+            <base_status desc="Item in place">1</base_status>
+            <awaiting_reshelving>false</awaiting_reshelving>
+            <physical_material_type desc="Livre">BOOK</physical_material_type>
+            <policy/>
+            <provenance/>
+            <po_line/>
+            <is_magnetic>false</is_magnetic>
+            <arrival_date>2007-01-26Z</arrival_date>
+            <year_of_issue/>
+            <enumeration_a/>
+            <enumeration_b/>
+            <enumeration_c/>
+            <enumeration_d/>
+            <enumeration_e/>
+            <enumeration_f/>
+            <enumeration_g/>
+            <enumeration_h/>
+            <chronology_i/>
+            <chronology_j/>
+            <chronology_k/>
+            <chronology_l/>
+            <chronology_m/>
+            <break_indicator/>
+            <pattern_type/>
+            <linking_number/>
+            <type_of_unit/>
+            <description/>
+            <receiving_operator>import</receiving_operator>
+            <process_type/>
+            <inventory_number/>
+            <inventory_price/>
+            <library desc="Bibliothèque 2">BIB_2</library>
+            <location desc="Location 2">LOC_2</location>
+            <alternative_call_number/>
+            <alternative_call_number_type/>
+            <storage_location_id/>
+            <pages/>
+            <pieces/>
+            <public_note/>
+            <fulfillment_note/>
+            <internal_note_1/>
+            <internal_note_2/>
+            <internal_note_3/>
+            <statistics_note_1/>
+            <statistics_note_2/>
+            <statistics_note_3/>
+            <requested>false</requested>
+            <physical_condition/>
+            <committed_to_retain/>
+            <retention_reason/>
+            <retention_note/>
+        </item_data>
+    </item>
+</items>

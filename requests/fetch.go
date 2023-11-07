@@ -43,11 +43,9 @@ func (f HttpFetcher) Fetch(url string) ([]byte, error) {
 		// if request time out, just ignore
 		// TODO: delay and request again
 		// TODO: handle other url.errors
-		log.Println(err)
 		return []byte{}, nil
 	}
 	if resp.StatusCode != http.StatusOK {
-		log.Printf("fetch: HTTP status code = %d", resp.StatusCode)
 		return []byte{}, errors.New(strconv.Itoa(resp.StatusCode))
 	}
 	data, err := io.ReadAll(resp.Body)
