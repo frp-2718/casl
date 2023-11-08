@@ -83,8 +83,9 @@ func (a *AlmaClient) GetLocations(ppn string) ([]*entities.AlmaLocation, error) 
 	}
 	if len(mms) == 0 {
 		return res, fmt.Errorf("GetAlmaLocation: PPN %s not found", ppn)
+	} else if len(mms) > 1 {
+		return res, fmt.Errorf("GetAlmaLocation: PPN %s found in %v", ppn, mms)
 	}
-	// TODO: handle the multi-MMS case
 	items, err := a.getItems(mms[0])
 	items_by_mms := make(map[string][]Item)
 	for _, item := range items {

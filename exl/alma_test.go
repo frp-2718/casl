@@ -1,6 +1,7 @@
 package exl
 
 import (
+	"casl/entities"
 	"casl/requests"
 	"encoding/xml"
 	"os"
@@ -22,6 +23,12 @@ func (m mockHttpFetcher) Fetch(url string) ([]byte, error) {
 		return data, nil
 	case almawsURL + url_bibs + "ppn_1_mms" + "&apikey=key":
 		data, err := os.ReadFile("testdata/ppn_1_mms.xml")
+		if err != nil {
+			return nil, err
+		}
+		return data, nil
+	case almawsURL + url_bibs + "ppn_get_locations" + "&apikey=key":
+		data, err := os.ReadFile("testdata/ppn_get_locations.xml")
 		if err != nil {
 			return nil, err
 		}
@@ -96,8 +103,49 @@ func TestNewAlmaClient(t *testing.T) {
 	})
 }
 
-// func (a *AlmaClient) GetLocations(ppn string) ([]*entities.AlmaLocation, error) {
 func TestGetLocations(t *testing.T) {
+	locations := []*entities.AlmaLocation{
+		{
+			Library_name:  "Bibliothèque 1",
+			Library_code:  "BIB_1",
+			Location_name: "Location 1",
+			Location_code: "LOC_1",
+			Call_number:   "CN_1",
+			NoDiscovery:   false,
+			Items: []*entities.AlmaItem{
+				{Process_name: "", Process_code: "", Status: "Item in place"},
+			},
+		},
+		{
+			Library_name:  "Bibliothèque 2",
+			Library_code:  "BIB_2",
+			Location_name: "Location 2",
+			Location_code: "LOC_2",
+			Call_number:   "CN_2",
+			NoDiscovery:   false,
+			Items: []*entities.AlmaItem{
+				{Process_name: "Acquisition", Process_code: "ACQ", Status: "Item in place"},
+			},
+		},
+	}
+
+	client, _ := NewAlmaClient("key", "", mockHttpFetcher{})
+	got, err := client.GetLocations("ppn_get_locations")
+	if err != nil {
+		t.Errorf("returned error %v", err)
+	}
+	if !reflect.DeepEqual(got, locations) {
+		t.Errorf("want %v, got %v", locations, got)
+	}
+	// _, err = client.GetLocations("ppn_3_mms.xml")
+	// if err == nil {
+	// 	t.Error("no error ?")
+	// }
+	// _, err = client.GetLocations("ppn_00_mms.xml")
+	// if err == nil {
+	// 	t.Error("no error ?")
+	// }
+
 }
 
 func TestGetMMSFromPPN(t *testing.T) {
@@ -129,13 +177,14 @@ func TestGetMMSFromPPN(t *testing.T) {
 
 func TestGetItems(t *testing.T) {
 	var name xml.Name
+	name.Local = "item"
 	items := []Item{
 		{
 			name,
 			Holding{false, "mms_1", "CN_1"},
 			ItemData{
 				Status{"Item in place", "1"},
-				Process{"", ""},
+				Process{},
 				Library{"Bibliothèque 1", "BIB_1"},
 				Location{"Location 1", "LOC_1"},
 			},
@@ -145,18 +194,18 @@ func TestGetItems(t *testing.T) {
 			Holding{false, "mms_2", "CN_2"},
 			ItemData{
 				Status{"Item in place", "1"},
-				Process{"", ""},
+				Process{"Acquisition", "ACQ"},
 				Library{"Bibliothèque 2", "BIB_2"},
 				Location{"Location 2", "LOC_2"},
 			},
 		},
 	}
 	client, _ := NewAlmaClient("key", "", mockHttpFetcher{})
-	res, err := client.getItems("mms_1")
+	got, err := client.getItems("mms_items")
 	if err != nil {
 		t.Errorf("got %v", err)
 	}
-	if !reflect.DeepEqual(res, items) {
-		t.Error()
+	if !reflect.DeepEqual(got, items) {
+		t.Errorf("want %v, got %v", items, got)
 	}
 }

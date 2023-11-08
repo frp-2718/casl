@@ -168,7 +168,7 @@ func DecodeItemsXML(data []byte) ([]Item, error) {
 	items.Items = []Item{}
 	err := xml.Unmarshal(data, &items)
 	if err != nil {
-		log.Printf("alma: decodeHoldingsXML: %v", err)
+		log.Printf("alma: decodeItemsXML: %v", err)
 		return nil, err
 	}
 	return items.Items, nil

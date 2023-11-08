@@ -17,13 +17,13 @@
             <publisher_const>Springer</publisher_const>
         </bib_data>
         <holding_data link="holding">
-            <holding_id>holding_1</holding_id>
+            <holding_id>mms_1</holding_id>
             <holding_suppress_from_publishing>false</holding_suppress_from_publishing>
             <calculated_suppress_from_publishing>false</calculated_suppress_from_publishing>
             <permanent_call_number_type desc="Other scheme">8</permanent_call_number_type>
-            <permanent_call_number>CN_2</permanent_call_number>
+            <permanent_call_number>CN_1</permanent_call_number>
             <call_number_type desc="Other scheme">8</call_number_type>
-            <call_number>BOUR</call_number>
+            <call_number>CN_1</call_number>
             <accession_number/>
             <copy_id/>
             <in_temp_location>false</in_temp_location>
@@ -94,7 +94,7 @@
     </item>
     <item link="item">
         <bib_data link="bib">
-            <mms_id>mms_1</mms_id>
+            <mms_id>mms_2</mms_id>
             <bib_suppress_from_publishing>false</bib_suppress_from_publishing>
             <title>Eléments de mathématique . Algèbre commutative . Chapitre 10</title>
             <author>Bourbaki , Nicolas</author>
@@ -109,13 +109,13 @@
             <publisher_const>Springer</publisher_const>
         </bib_data>
         <holding_data link="holding">
-            <holding_id>holding</holding_id>
+            <holding_id>mms_2</holding_id>
             <holding_suppress_from_publishing>false</holding_suppress_from_publishing>
             <calculated_suppress_from_publishing>false</calculated_suppress_from_publishing>
             <permanent_call_number_type desc="Dewey Decimal classification">1</permanent_call_number_type>
-            <permanent_call_number>CN_1</permanent_call_number>
+            <permanent_call_number>CN_2</permanent_call_number>
             <call_number_type desc="Dewey Decimal classification">1</call_number_type>
-            <call_number>510 BOU</call_number>
+            <call_number>CN_2</call_number>
             <accession_number/>
             <copy_id/>
             <in_temp_location>false</in_temp_location>
@@ -159,7 +159,7 @@
             <type_of_unit/>
             <description/>
             <receiving_operator>import</receiving_operator>
-            <process_type/>
+            <process_type desc="Acquisition">ACQ</process_type>
             <inventory_number/>
             <inventory_price/>
             <library desc="Bibliothèque 2">BIB_2</library>
