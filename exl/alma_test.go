@@ -6,6 +6,7 @@ import (
 	"encoding/xml"
 	"os"
 	"reflect"
+	"sort"
 	"testing"
 )
 
@@ -104,6 +105,49 @@ func TestNewAlmaClient(t *testing.T) {
 }
 
 func TestGetLocations(t *testing.T) {
+	location_1 := entities.AlmaLocation{
+		Library_name:  "Bibliothèque 1",
+		Library_code:  "BIB_1",
+		Location_name: "Location 1",
+		Location_code: "LOC_1",
+		Call_number:   "CN_1",
+		NoDiscovery:   false,
+		Items: []*entities.AlmaItem{
+			{Process_name: "", Process_code: "", Status: "Item in place"},
+		},
+	}
+	location_2 := entities.AlmaLocation{
+		Library_name:  "Bibliothèque 2",
+		Library_code:  "BIB_2",
+		Location_name: "Location 2",
+		Location_code: "LOC_2",
+		Call_number:   "CN_2",
+		NoDiscovery:   false,
+		Items: []*entities.AlmaItem{
+			{Process_name: "Acquisition", Process_code: "ACQ", Status: "Item in place"},
+		},
+	}
+	locations := []*entities.AlmaLocation{&location_1, &location_2}
+
+	client, _ := NewAlmaClient("key", "", mockHttpFetcher{})
+	got, err := client.GetLocations("ppn_get_locations")
+	if err != nil {
+		t.Errorf("returned error %v", err)
+	}
+	sort.Slice(got, func(i, j int) bool {
+		return got[i].Call_number < got[j].Call_number
+	})
+	if !reflect.DeepEqual(got, locations) {
+		t.Errorf("want %v, got %v", locations, got)
+	}
+	_, err = client.GetLocations("ppn_3_mms.xml")
+	_, err2 := client.GetLocations("ppn_00_mms.xml")
+	if err == nil || err2 == nil {
+		t.Error("want error, got ok")
+	}
+}
+
+func TestGetFilteredLocations(t *testing.T) {
 	locations := []*entities.AlmaLocation{
 		{
 			Library_name:  "Bibliothèque 1",
@@ -116,36 +160,16 @@ func TestGetLocations(t *testing.T) {
 				{Process_name: "", Process_code: "", Status: "Item in place"},
 			},
 		},
-		{
-			Library_name:  "Bibliothèque 2",
-			Library_code:  "BIB_2",
-			Location_name: "Location 2",
-			Location_code: "LOC_2",
-			Call_number:   "CN_2",
-			NoDiscovery:   false,
-			Items: []*entities.AlmaItem{
-				{Process_name: "Acquisition", Process_code: "ACQ", Status: "Item in place"},
-			},
-		},
 	}
 
 	client, _ := NewAlmaClient("key", "", mockHttpFetcher{})
-	got, err := client.GetLocations("ppn_get_locations")
+	got, err := client.GetFilteredLocations("ppn_get_locations", []string{"BIB_1"})
 	if err != nil {
 		t.Errorf("returned error %v", err)
 	}
 	if !reflect.DeepEqual(got, locations) {
 		t.Errorf("want %v, got %v", locations, got)
 	}
-	// _, err = client.GetLocations("ppn_3_mms.xml")
-	// if err == nil {
-	// 	t.Error("no error ?")
-	// }
-	// _, err = client.GetLocations("ppn_00_mms.xml")
-	// if err == nil {
-	// 	t.Error("no error ?")
-	// }
-
 }
 
 func TestGetMMSFromPPN(t *testing.T) {
@@ -208,4 +232,31 @@ func TestGetItems(t *testing.T) {
 	if !reflect.DeepEqual(got, items) {
 		t.Errorf("want %v, got %v", items, got)
 	}
+}
+
+func TestStats(t *testing.T) {
+	client, _ := NewAlmaClient("key", "", mockHttpFetcher{})
+	bibs, items, total := getStats(client)
+	if bibs != 0 || items != 0 || total != 0 {
+		t.Errorf("want 0 0 0, got %d %d %d", bibs, items, total)
+	}
+	client.getItems("mms_1")
+	bibs, items, total = getStats(client)
+	if bibs != 0 || items != 1 || total != 1 {
+		t.Errorf("want 0 1 1, got %d %d %d", bibs, items, total)
+	}
+	client.GetLocations("ppn_get_locations")
+	bibs, items, total = getStats(client)
+	if bibs != 1 || items != 2 || total != 3 {
+		t.Errorf("want 1 2 3, got %d %d %d", bibs, items, total)
+	}
+	client.GetFilteredLocations("ppn_get_locations", []string{"mms_items"})
+	bibs, items, total = getStats(client)
+	if bibs != 2 || items != 3 || total != 5 {
+		t.Errorf("want 2 3 5, got %d %d %d", bibs, items, total)
+	}
+}
+
+func getStats(client *AlmaClient) (int, int, int) {
+	return client.Stats("bibs"), client.Stats("items"), client.Stats("total")
 }

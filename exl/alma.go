@@ -8,7 +8,6 @@ import (
 	"casl/requests"
 	"errors"
 	"fmt"
-	"log"
 	"slices"
 )
 
@@ -138,12 +137,10 @@ func (a *AlmaClient) getItems(mms string) ([]Item, error) {
 	a.stats.items_req += 1
 	data, err := a.fetcher.Fetch(a.buildURL(items_t, mms))
 	if err != nil {
-		log.Printf("alma: getItems: %v", err)
 		return nil, err
 	}
 	items, err := DecodeItemsXML(data)
 	if err != nil {
-		log.Printf("alma: getItems: %v", err)
 		return nil, errors.New("alma: getItems: unable to decode XML data")
 	}
 	return items, nil
@@ -162,22 +159,11 @@ func (a *AlmaClient) getMMSfromPPN(ppn string) ([]string, error) {
 	}
 	result := []string{}
 	for _, bib := range bibs.Bibs {
-		if ppnMatch(bib.Network_numbers, ppn) {
+		if slices.Contains(bib.Network_numbers, ppn) {
 			result = append(result, bib.MMS_id)
 		}
 	}
 	return result, nil
-}
-
-// Because Alma returns all MMS containing a Network Number which looks like
-// the searched PPN, it is necessary to check.
-func ppnMatch(ids []string, ppn string) bool {
-	for _, id := range ids {
-		if id == ppn {
-			return true
-		}
-	}
-	return false
 }
 
 func (a *AlmaClient) buildURL(urlType int, id string) string {

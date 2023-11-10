@@ -99,7 +99,7 @@ func (ctrl *Controller) getMappingsFromCSV(csv_file string) {
 		maps.rcr2alma[record[2]] = append(maps.rcr2alma[record[2]], record[1])
 		maps.rcr2iln[record[2]] = record[3]
 		maps.alma2str[record[1]] = record[0]
-		maps.rcr2str[record[2]] = record[4]
+		// maps.rcr2str[record[2]] = record[4]
 	}
 	ctrl.Mappings = &maps
 }

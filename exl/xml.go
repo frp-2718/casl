@@ -3,7 +3,6 @@ package exl
 import (
 	"encoding/xml"
 	"fmt"
-	"log"
 	"strings"
 )
 
@@ -12,14 +11,10 @@ type almaBib struct {
 	Network_numbers []string `xml:"network_numbers>network_number"`
 	MMS_id          string   `xml:"mms_id"`
 }
+
 type bibsResult struct {
 	XMLName xml.Name  `xml:"bibs"`
 	Bibs    []almaBib `xml:"bib"`
-}
-
-type holdingsResult struct {
-	XMLName  xml.Name  `xml:"holdings"`
-	Holdings []Holding `xml:"holding"`
 }
 
 type Holding struct {
@@ -91,10 +86,19 @@ func decodeBibsXML(data []byte) (*bibsResult, error) {
 	var b bibsResult
 	err := xml.Unmarshal(data, &b)
 	if err != nil {
-		log.Printf("alma: GetMMSfromPPN: %v", err)
 		return nil, err
 	}
 	return &b, nil
+}
+
+func DecodeItemsXML(data []byte) ([]Item, error) {
+	var items Items
+	items.Items = []Item{}
+	err := xml.Unmarshal(data, &items)
+	if err != nil {
+		return nil, err
+	}
+	return items.Items, nil
 }
 
 func decodeError(data []byte, status int) error {
@@ -105,7 +109,6 @@ func decodeError(data []byte, status int) error {
 	var e almaError
 	err := xml.Unmarshal(data, &e)
 	if err != nil {
-		log.Printf("decodeError: %s", err)
 		return &FetchError{errorMessage: ""}
 	}
 	switch status {
@@ -137,39 +140,4 @@ func decodeError(data []byte, status int) error {
 		}
 	}
 	return &FetchError{errorMessage: e.ErrorMessage}
-}
-
-func notFound(data []byte) bool {
-	type almaResponse struct {
-		Count string `xml:"total_record_count,attr"`
-	}
-	var r almaResponse
-	err := xml.Unmarshal(data, &r)
-	if err != nil {
-		log.Printf("notFound: unmarshal error: %s", err)
-		return true
-	}
-	return r.Count == "0" // item not found
-}
-
-func decodeHoldingsXML(data []byte) ([]Holding, error) {
-	var h holdingsResult
-	h.Holdings = []Holding{} // should be initialized in case of there is 0 holdings in the data
-	err := xml.Unmarshal(data, &h)
-	if err != nil {
-		log.Printf("alma: decodeHoldingsXML: %v", err)
-		return nil, err
-	}
-	return h.Holdings, nil
-}
-
-func DecodeItemsXML(data []byte) ([]Item, error) {
-	var items Items
-	items.Items = []Item{}
-	err := xml.Unmarshal(data, &items)
-	if err != nil {
-		log.Printf("alma: decodeItemsXML: %v", err)
-		return nil, err
-	}
-	return items.Items, nil
 }
