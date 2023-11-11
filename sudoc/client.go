@@ -129,9 +129,18 @@ func (sc *SudocClient) Stats(t string) int {
 	}
 }
 
+// GetFollowedRCRs returns a list of all the RCRs of interest.
+func (sc *SudocClient) GetFollowedRCRs() []string {
+	var rcrs []string
+	for k, _ := range sc.rcrs {
+		rcrs = append(rcrs, k)
+	}
+	return rcrs
+}
+
 // getRCRs builds the map RCR->Library from the iln2rcr service.
-func (sc *SudocClient) getRCRs(rcrs []string) (map[string]library, error) {
-	url := ILN2RCR_URL + strings.Join(rcrs, ",")
+func (sc *SudocClient) getRCRs(ilns []string) (map[string]library, error) {
+	url := ILN2RCR_URL + strings.Join(ilns, ",")
 	sc.stats.iln2rcr += 1
 	data, err := sc.fetcher.Fetch(url)
 	if err != nil {

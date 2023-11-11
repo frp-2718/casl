@@ -195,8 +195,8 @@ func TestStats(t *testing.T) {
 
 	n := rand.Intn(100) + 10
 	for i := 0; i < n; i++ {
-		_, _ = sc.getRCRs([]string{"1", "2"})
-		_, _ = sc.GetLocations("")
+		sc.getRCRs([]string{"1", "2"})
+		sc.GetLocations("")
 	}
 	iln2rcr = sc.Stats("iln2rcr")
 	marcxml = sc.Stats("marcxml")

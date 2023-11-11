@@ -10,6 +10,7 @@ type suClient interface {
 	GetLocations(ppn string) ([]*entities.SudocLocation, error)
 	GetFilteredLocations(ppn string, rcrs []string) ([]*entities.SudocLocation, error)
 	Stats(t string) int
+	GetFollowedRCRs() []string
 }
 
 type almaClient interface {

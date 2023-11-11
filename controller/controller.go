@@ -20,7 +20,6 @@ func NewController(configFile string, fetcher requests.Fetcher) (Controller, err
 
 	ctrl.loadConfig(configFile)
 	ctrl.getMappingsFromCSV(ctrl.Config.MappingFilePath)
-	ctrl.getRCRs()
 	ctrl.getLibs()
 
 	suclient, err := sudoc.NewSudocClient(ctrl.Config.ILNs, fetcher)
@@ -28,6 +27,8 @@ func NewController(configFile string, fetcher requests.Fetcher) (Controller, err
 		return ctrl, err
 	}
 	ctrl.SUClient = suclient
+	ctrl.Config.FollowedRCR = ctrl.SUClient.GetFollowedRCRs()
+
 	ctrl.AlmaClient, err = exl.NewAlmaClient(ctrl.Config.AlmaAPIKey, "", fetcher)
 	if err != nil {
 		return ctrl, err
@@ -51,17 +52,18 @@ func (ctrl *Controller) loadConfig(configFile string) {
 	ctrl.Config = &conf
 }
 
-func (ctrl *Controller) getRCRs() {
-	rcrs := make([]string, 0, len(ctrl.Mappings.rcr2str))
+// TODO: what is this function ?
+// func (ctrl *Controller) s() {
+// 	rcrs := make([]string, 0, len(ctrl.Mappings.rcr2str))
 
-	for k := range ctrl.Mappings.rcr2str {
-		if !slices.Contains(ctrl.Config.IgnoredSudocRCR, k) {
-			rcrs = append(rcrs, k)
-		}
-	}
+// 	for k := range ctrl.Mappings.rcr2str {
+// 		if !slices.Contains(ctrl.Config.IgnoredSudocRCR, k) {
+// 			rcrs = append(rcrs, k)
+// 		}
+// 	}
 
-	ctrl.Config.FollowedRCR = rcrs
-}
+// 	ctrl.Config.FollowedRCR = rcrs
+// }
 
 func (ctrl *Controller) getLibs() {
 	libs := make([]string, 0, len(ctrl.Mappings.alma2str))
@@ -99,6 +101,7 @@ func (ctrl *Controller) getMappingsFromCSV(csv_file string) {
 		maps.rcr2alma[record[2]] = append(maps.rcr2alma[record[2]], record[1])
 		maps.rcr2iln[record[2]] = record[3]
 		maps.alma2str[record[1]] = record[0]
+		// TODO: is that mapping really useful ?
 		// maps.rcr2str[record[2]] = record[4]
 	}
 	ctrl.Mappings = &maps
@@ -123,7 +126,9 @@ MAIN_SU_LOOP:
 				continue MAIN_SU_LOOP
 			}
 		}
-		library := ctrl.Mappings.rcr2str[sloc.RCR]
+		// TODO: test that
+		//library := ctrl.Mappings.rcr2str[sloc.RCR]
+		library := sloc.Name
 		if slices.Contains(ctrl.Config.MonolithicRCR, sloc.RCR) && sloc.Sublocation != "" {
 			library += " - " + sloc.Sublocation
 		}
