@@ -31,6 +31,8 @@ const (
 	items_t
 )
 
+// TODO: decode errors from EXL API
+
 // NewAlmaClient creates an Alma client with the default http client if none
 // is provided.
 func NewAlmaClient(apiKey, baseURL string, fetcher requests.Fetcher) (*AlmaClient, error) {
@@ -57,7 +59,7 @@ func NewAlmaClient(apiKey, baseURL string, fetcher requests.Fetcher) (*AlmaClien
 // GetFilteredLocations gets Alma locations of a given PPN, properly filled,
 // from the items API. Only the locations regarding the libraries of
 // interest, given as a second argument, are provided.
-func (a *AlmaClient) GetFilteredLocations(ppn string, lib_codes []string) ([]*entities.AlmaLocation, error) {
+func (a *AlmaClient) GetFilteredLocations(ppn string, lib_codes []string, ignored_locations []string) ([]*entities.AlmaLocation, error) {
 	locations, err := a.GetLocations(ppn)
 	var filtered []*entities.AlmaLocation
 	if err != nil {
@@ -65,7 +67,7 @@ func (a *AlmaClient) GetFilteredLocations(ppn string, lib_codes []string) ([]*en
 	}
 
 	for _, location := range locations {
-		if slices.Contains(lib_codes, location.Library_code) && entities.ValidLocation(*location) {
+		if slices.Contains(lib_codes, location.Library_code) && location.IsValid(ignored_locations) {
 			filtered = append(filtered, location)
 		}
 	}

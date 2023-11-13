@@ -15,7 +15,7 @@ type suClient interface {
 
 type almaClient interface {
 	GetLocations(ppn string) ([]*entities.AlmaLocation, error)
-	GetFilteredLocations(ppn string, lib_codes []string) ([]*entities.AlmaLocation, error)
+	GetFilteredLocations(ppn string, lib_codes []string, ignored_locataions []string) ([]*entities.AlmaLocation, error)
 	Stats(t string) int
 }
 
@@ -26,6 +26,8 @@ type Controller struct {
 	AlmaClient almaClient
 }
 
+// TODO: add a Filter struct to contain all filters
+// TODO: add a filter for ignored alma status ("ACQ")
 type config struct {
 	MappingFilePath string   `json:"alma-rcr_file_path"`
 	AlmaAPIKey      string   `json:"alma_api_key"`

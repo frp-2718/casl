@@ -1,12 +1,9 @@
 package entities
 
 import (
-	"encoding/csv"
 	"fmt"
-	"log"
-	"os"
+	"slices"
 	"strings"
-	"time"
 )
 
 type BibRecord struct {
@@ -39,10 +36,10 @@ type AlmaItem struct {
 	Status       string
 }
 
-// TODO: complete the string representation of a BibRecord
 func (r BibRecord) String() string {
 	var sb strings.Builder
 	fmt.Fprintf(&sb, "*** PPN: %s\n\n", r.PPN)
+	fmt.Fprintf(&sb, "*** MMS: %s\n\n", r.MMS)
 	for _, sl := range r.SudocLocations {
 		fmt.Fprintf(&sb, "%s\n", sl)
 	}
@@ -72,51 +69,12 @@ func (a AlmaLocation) String() string {
 	return sb.String()
 }
 
-func (r BibRecord) toCSV() [][]string {
-	var records [][]string
-	for _, sudocLoc := range r.SudocLocations {
-		records = append(records, []string{r.PPN, sudocLoc.ILN, "", sudocLoc.Name + " - " + sudocLoc.Sublocation, sudocLoc.RCR})
-	}
-	for _, almaLoc := range r.AlmaLocations {
-		records = append(records, []string{r.PPN, "", almaLoc.Library_name, "", ""})
-	}
-	return records
-}
-
-func WriteCSV(results []BibRecord) {
-	var records [][]string
-	records = append(records, []string{"PPN", "ILN", "Bibliothèque Alma",
-		"Bibliothèque SUDOC", "RCR"})
-
-	for _, res := range results {
-		records = append(records, res.toCSV()...)
-	}
-
-	t := time.Now()
-	format := fmt.Sprintf("%d%02d%02d-%02d%02d%02d", t.Year(), t.Month(), t.Day(),
-		t.Hour(), t.Minute(), t.Second())
-	filename := "resultats_" + format + ".csv"
-	f, err := os.Create(filename)
-	defer f.Close()
-
-	if err != nil {
-		log.Fatal("failed to open file", err)
-	}
-
-	w := csv.NewWriter(f)
-	err = w.WriteAll(records)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-func ValidLocation(a AlmaLocation) bool {
-	if a.NoDiscovery || a.Items == nil || len(a.Items) == 0 || a.Location_code == "PILON" || a.Location_code == "PERDU" {
+func (a *AlmaLocation) IsValid(ignored_locations []string) bool {
+	if a.NoDiscovery || a.Items == nil || len(a.Items) == 0 || slices.Contains(ignored_locations, a.Location_code) {
 		return false
 	}
 	for _, item := range a.Items {
-		// TODO: use a slice instead of "ACQ" to be able to add status to be
+		// TODO: use a configuration instead of "ACQ" to be able to add status to be
 		// ignored
 		if item.Process_code != "ACQ" {
 			return true

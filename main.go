@@ -69,7 +69,7 @@ func main() {
 		if len(sudoc) > 0 {
 			record.SudocLocations = sudoc
 		}
-		alma, err := ctrl.AlmaClient.GetFilteredLocations(record.PPN, ctrl.Config.FolowedLibs)
+		alma, err := ctrl.AlmaClient.GetFilteredLocations(record.PPN, ctrl.Config.FolowedLibs, ctrl.Config.IgnoredAlmaColl)
 		if err != nil {
 			log.Println(err)
 			continue
