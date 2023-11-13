@@ -15,6 +15,8 @@ import (
 	"time"
 )
 
+// NewController creates a fully self-configured controller, which is the entry
+// point of the process.
 func NewController(configFile string, fetcher requests.Fetcher) (Controller, error) {
 	var ctrl Controller
 
@@ -52,19 +54,6 @@ func (ctrl *Controller) loadConfig(configFile string) {
 	ctrl.Config = &conf
 }
 
-// TODO: what is this function ?
-// func (ctrl *Controller) s() {
-// 	rcrs := make([]string, 0, len(ctrl.Mappings.rcr2str))
-
-// 	for k := range ctrl.Mappings.rcr2str {
-// 		if !slices.Contains(ctrl.Config.IgnoredSudocRCR, k) {
-// 			rcrs = append(rcrs, k)
-// 		}
-// 	}
-
-// 	ctrl.Config.FollowedRCR = rcrs
-// }
-
 func (ctrl *Controller) getLibs() {
 	libs := make([]string, 0, len(ctrl.Mappings.alma2str))
 
@@ -75,6 +64,8 @@ func (ctrl *Controller) getLibs() {
 	ctrl.Config.FolowedLibs = libs
 }
 
+// The CSV alma-rcr mapping should be formatted as follows :
+// "Library name","Library code",RCR,ILN
 func (ctrl *Controller) getMappingsFromCSV(csv_file string) {
 	var maps mappings
 	maps.alma2rcr = make(map[string][]string)
@@ -101,12 +92,12 @@ func (ctrl *Controller) getMappingsFromCSV(csv_file string) {
 		maps.rcr2alma[record[2]] = append(maps.rcr2alma[record[2]], record[1])
 		maps.rcr2iln[record[2]] = record[3]
 		maps.alma2str[record[1]] = record[0]
-		// TODO: is that mapping really useful ?
-		// maps.rcr2str[record[2]] = record[4]
 	}
 	ctrl.Mappings = &maps
 }
 
+// Summary represents the informations necessary to identify an anomaly, ie a
+// record for which alma locations and sudoc locations are not matching.
 type Summary struct {
 	ILN      string
 	RCR      string
@@ -115,6 +106,8 @@ type Summary struct {
 	AlmaLib  string
 }
 
+// Compare looks for anomalies - ie locations not maching - in the provided
+// bib records.
 func (ctrl *Controller) Compare(record *entities.BibRecord) []Summary {
 	var anomalies []Summary
 
@@ -154,6 +147,7 @@ func (s Summary) toCSV() []string {
 	return records
 }
 
+// WriteCSV translates a list of Summaries into a CSV file.
 func (ctrl *Controller) WriteCSV(results []Summary) {
 	var records [][]string
 	records = append(records, []string{"PPN", "ILN", "Bibliothèque Alma",
@@ -168,11 +162,10 @@ func (ctrl *Controller) WriteCSV(results []Summary) {
 		t.Hour(), t.Minute(), t.Second())
 	filename := "resultats_" + format + ".csv"
 	f, err := os.Create(filename)
-	defer f.Close()
-
 	if err != nil {
 		log.Fatal("failed to open file", err)
 	}
+	defer f.Close()
 
 	w := csv.NewWriter(f)
 	err = w.WriteAll(records)

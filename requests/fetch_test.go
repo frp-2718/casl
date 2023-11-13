@@ -39,7 +39,7 @@ func TestFetch(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		got := fetch(server.URL + test.url)
+		got := Fetch(server.URL + test.url)
 		if string(got) != string(test.want) {
 			t.Errorf("[%d] fetch(%q) returned %q : want %q", i, test.url, got, test.want)
 		}

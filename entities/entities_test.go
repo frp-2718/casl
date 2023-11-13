@@ -8,14 +8,14 @@ func TestValid(t *testing.T) {
 
 	for _, l := range validLocations {
 		t.Run(l.Library_name, func(t *testing.T) {
-			if !validLocation(l) {
+			if !ValidLocation(l) {
 				t.Errorf("got false; want true")
 			}
 		})
 	}
 	for _, l := range invalidLocations {
 		t.Run(l.Library_name, func(t *testing.T) {
-			if validLocation(l) {
+			if ValidLocation(l) {
 				t.Errorf("got true; want false")
 			}
 		})
