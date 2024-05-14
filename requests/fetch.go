@@ -60,7 +60,7 @@ func (f HttpFetcher) Fetch(url string) ([]byte, error) {
 }
 
 func (f HttpFetcher) FetchMarc(ppn string) ([]byte, error) {
-	return Fetch(marcxml_url + ppn + ".xml")
+	return f.Fetch(marcxml_url + ppn + ".xml")
 }
 
 func buildURLs(params []string, max_params int) []string {
